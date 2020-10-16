@@ -4,6 +4,8 @@ using UnityEngine;
 using FairyGUI.Utils;
 #if FAIRYGUI_TOLUA
 using LuaInterface;
+#elif XLUA
+using XLua;
 #endif
 
 namespace FairyGUI
@@ -82,7 +84,20 @@ namespace FairyGUI
 
             if (scrollPane != null)
                 scrollPane.Dispose();
-
+#if XLUA
+            if(_onDispose != null)
+            {
+                try
+                {
+                    _onDispose.Call();
+                }
+                catch(Exception e)
+                {
+                    UnityEngine.Debug.LogError(e);
+                }
+            }
+            _peerTable = null;
+#endif
             base.Dispose(); //Dispose native tree first, avoid DisplayObject.RemoveFromParent call
 
             cnt = _children.Count;
@@ -1641,6 +1656,40 @@ namespace FairyGUI
             for (int i = 0; i < cnt; ++i)
                 _transitions[i].OnOwnerRemovedFromStage();
         }
+
+
+if XLUA && !FAIRYGUI_TOLUA
+#if UNITY_EDITOR
+        protected object _userData;
+        [BlackList]
+        public object userData
+        {
+            get { return _userData; }
+            set { _userData = value; }
+        }
+#endif
+        
+        internal LuaTable _peerTable;
+
+        public LuaTable peerTable
+        {
+            get { return _peerTable; }
+            set { _peerTable = value; }
+        }
+        
+        private EventListener _onDispose;
+        public EventListener onDispose
+        {
+            get
+            {
+                if(_onDispose == null)
+                {
+                    _onDispose = new EventListener(this, "onDispose");
+                }
+                return _onDispose;
+            }
+        }
+#endif
 
 #if FAIRYGUI_TOLUA
         internal LuaTable _peerTable;

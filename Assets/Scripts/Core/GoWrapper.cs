@@ -54,6 +54,11 @@ namespace FairyGUI
             SetWrapTarget(go, false);
         }
 
+        public GoWrapper(GameObject go, bool cloneMaterial) : this()
+        {
+            SetWrapTarget(go, cloneMaterial);
+        }
+
         /// <summary>
         /// 设置包装对象。注意如果原来有包装对象，设置新的包装对象后，原来的包装对象只会被删除引用，但不会被销毁。
         /// 对象包含的所有材质不会被复制，如果材质已经是公用的，这可能影响到其他对象。如果希望自动复制，改为使用SetWrapTarget(target, true)设置。

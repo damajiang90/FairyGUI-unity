@@ -375,12 +375,20 @@ namespace FairyGUI
                 int cnt = this.numChildren;
                 if (val == DOWN || val == SELECTED_OVER || val == SELECTED_DISABLED)
                 {
-                    Color color = new Color(_downEffectValue, _downEffectValue, _downEffectValue);
+                    //Color color = new Color(_downEffectValue, _downEffectValue, _downEffectValue);
                     for (int i = 0; i < cnt; i++)
                     {
                         GObject obj = this.GetChildAt(i);
-                        if ((obj is IColorGear) && !(obj is GTextField))
-                            ((IColorGear)obj).color = color;
+                        IColorGear colorGear = obj as IColorGear;
+                        if(colorGear != null && !(obj is GTextField))
+                        {
+                            IAdditionColorGear additionColorGear = colorGear as IAdditionColorGear;
+                            Color targetColor = additionColorGear != null ? (Color)additionColorGear.originColor : Color.white;
+                            targetColor.r *= _downEffectValue;
+                            targetColor.g *= _downEffectValue;
+                            targetColor.b *= _downEffectValue;
+                            colorGear.color = targetColor;
+                        }
                     }
                 }
                 else
@@ -388,8 +396,13 @@ namespace FairyGUI
                     for (int i = 0; i < cnt; i++)
                     {
                         GObject obj = this.GetChildAt(i);
-                        if ((obj is IColorGear) && !(obj is GTextField))
-                            ((IColorGear)obj).color = Color.white;
+                        IColorGear colorGear = obj as IColorGear;
+                        if(colorGear != null && !(obj is GTextField))
+                        {
+                            IAdditionColorGear additionColorGear = colorGear as IAdditionColorGear;
+                            Color originColor = additionColorGear != null ? (Color)additionColorGear.originColor : Color.white;
+                            colorGear.color = originColor;
+                        }
                     }
                 }
             }

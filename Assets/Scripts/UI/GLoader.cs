@@ -7,7 +7,7 @@ namespace FairyGUI
     /// <summary>
     /// GLoader class
     /// </summary>
-    public class GLoader : GObject, IAnimationGear, IColorGear
+    public class GLoader : GObject, IAnimationGear, IAdditionColorGear
     {
         /// <summary>
         /// Display an error sign if the loader fails to load the content.
@@ -246,6 +246,8 @@ namespace FairyGUI
             get { return _content.shader; }
             set { _content.shader = value; }
         }
+
+        public Color32 originColor{ get; set; } = Color.white;
 
         /// <summary>
         /// 
@@ -666,6 +668,7 @@ namespace FairyGUI
 
             if (buffer.ReadBool())
                 _content.color = buffer.ReadColor();
+            originColor = color;
             _content.fillMethod = (FillMethod)buffer.ReadByte();
             if (_content.fillMethod != FillMethod.None)
             {

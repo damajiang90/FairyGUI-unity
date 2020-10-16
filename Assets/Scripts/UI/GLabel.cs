@@ -6,7 +6,7 @@ namespace FairyGUI
     /// <summary>
     /// GLabel class.
     /// </summary>
-    public class GLabel : GComponent, IColorGear
+    public class GLabel : GComponent, IAdditionColorGear
     {
         protected GObject _titleObject;
         protected GObject _iconObject;
@@ -134,6 +134,8 @@ namespace FairyGUI
             }
         }
 
+        public Color32 originColor{ get; set; } = Color.white;
+
         /// <summary>
         /// 
         /// </summary>
@@ -184,6 +186,7 @@ namespace FairyGUI
                 this.icon = str;
             if (buffer.ReadBool())
                 this.titleColor = buffer.ReadColor();
+            originColor = color;
             int iv = buffer.ReadInt();
             if (iv != 0)
                 this.titleFontSize = iv;

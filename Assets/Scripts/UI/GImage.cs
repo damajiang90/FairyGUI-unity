@@ -6,7 +6,7 @@ namespace FairyGUI
     /// <summary>
     /// GImage class.
     /// </summary>
-    public class GImage : GObject, IColorGear
+    public class GImage : GObject, IAdditionColorGear
     {
         Image _content;
 
@@ -20,6 +20,8 @@ namespace FairyGUI
             _content.gOwner = this;
             displayObject = _content;
         }
+
+        public Color32 originColor{ get; set; } = Color.white;
 
         /// <summary>
         /// Color of the image. 
@@ -157,6 +159,7 @@ namespace FairyGUI
 
             if (buffer.ReadBool())
                 _content.color = buffer.ReadColor();
+            originColor = color;
             _content.graphics.flip = (FlipType)buffer.ReadByte();
             _content.fillMethod = (FillMethod)buffer.ReadByte();
             if (_content.fillMethod != FillMethod.None)

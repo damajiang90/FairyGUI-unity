@@ -6,7 +6,7 @@ namespace FairyGUI
     /// <summary>
     /// GMovieClip class.
     /// </summary>
-    public class GMovieClip : GObject, IAnimationGear, IColorGear
+    public class GMovieClip : GObject, IAnimationGear, IAdditionColorGear
     {
         MovieClip _content;
         EventListener _onPlayEnd;
@@ -56,6 +56,8 @@ namespace FairyGUI
                 UpdateGear(5);
             }
         }
+
+        public Color32 originColor{ get; set; } = Color.white;
 
         /// <summary>
         /// 
@@ -182,6 +184,7 @@ namespace FairyGUI
 
             if (buffer.ReadBool())
                 _content.color = buffer.ReadColor();
+            originColor = color;
             _content.graphics.flip = (FlipType)buffer.ReadByte();
             _content.frame = buffer.ReadInt();
             _content.playing = buffer.ReadBool();
