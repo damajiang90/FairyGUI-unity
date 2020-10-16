@@ -40,7 +40,7 @@ namespace FairyGUI
 
         Vector2 _clipSoftness;
         int _sortingChildCount;
-        EventCallback0 _buildDelegate;
+        Action _buildDelegate;
         Controller _applyingController;
 
         EventListener _onDrop;
@@ -58,7 +58,7 @@ namespace FairyGUI
         {
             rootContainer = new Container("GComponent");
             rootContainer.gOwner = this;
-            rootContainer.onUpdate = OnUpdate;
+            rootContainer.onUpdate += OnUpdate;
             container = rootContainer;
 
             displayObject = rootContainer;
@@ -100,6 +100,13 @@ namespace FairyGUI
                 _peerTable = null;
             }
 #endif
+
+#if FAIRYGUI_PUERTS
+            if (__onDispose != null)
+                __onDispose();
+            __onConstruct = null;
+            __onDispose = null;
+#endif
         }
 
         /// <summary>
@@ -119,6 +126,10 @@ namespace FairyGUI
             set { rootContainer.fairyBatching = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="childChanged"></param>
         public void InvalidateBatchingState(bool childChanged)
         {
             if (childChanged)
@@ -136,6 +147,10 @@ namespace FairyGUI
             set { rootContainer.opaque = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <value></value>
         public Margin margin
         {
             get { return _margin; }
@@ -148,6 +163,9 @@ namespace FairyGUI
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ChildrenRenderOrder childrenRenderOrder
         {
             get { return _childrenRenderOrder; }
@@ -161,6 +179,9 @@ namespace FairyGUI
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int apexIndex
         {
             get { return _apexIndex; }
@@ -174,6 +195,15 @@ namespace FairyGUI
                         BuildNativeDisplayList();
                 }
             }
+        }
+
+        /// <summary>
+        /// If true, children can be navigated by TAB from first to last, and repeat
+        /// </summary>
+        public bool tabStopChildren
+        {
+            get { return rootContainer.tabStopChildren; }
+            set { rootContainer.tabStopChildren = value; }
         }
 
         /// <summary>
@@ -392,7 +422,7 @@ namespace FairyGUI
 
                 if (i != cnt - 1)
                 {
-                    if (!(gcom is GComponent))
+                    if (!(obj is GComponent))
                     {
                         obj = null;
                         break;
@@ -630,6 +660,26 @@ namespace FairyGUI
                 p = p.parent;
             }
             return false;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="objs"></param>
+        public void ChangeChildrenOrder(IList<GObject> objs)
+        {
+            int cnt = objs.Count;
+            for (int i = 0; i < cnt; i++)
+            {
+                GObject obj = objs[i];
+                if (obj.parent != this)
+                    throw new Exception("Not a child of this container");
+
+                _children[i] = obj;
+            }
+            BuildNativeDisplayList();
+            SetBoundsChangedFlag();
         }
 
         /// <summary>
@@ -1451,7 +1501,7 @@ namespace FairyGUI
                 child.Setup_AfterAdd(buffer, buffer.position);
                 child.underConstruct = false;
                 if (child.displayObject != null)
-                    ToolSet.SetParent(child.displayObject.cachedTransform, this.displayObject.cachedTransform);
+                    child.displayObject.cachedTransform.SetParent(this.displayObject.cachedTransform, false);
 
                 buffer.position = nextPos;
             }
@@ -1520,6 +1570,10 @@ namespace FairyGUI
 
 #if FAIRYGUI_TOLUA
             CallLua("ctor");
+#endif
+#if FAIRYGUI_PUERTS
+            if (__onConstruct != null)
+                __onConstruct();
 #endif
         }
 
@@ -1604,7 +1658,15 @@ namespace FairyGUI
                 LuaFunction ctor = _peerTable.GetLuaFunction(funcName);
                 if (ctor != null)
                 {
-                    ctor.Call(this);
+                    try
+                    {
+                        ctor.Call(this);
+                    }
+                    catch (Exception err)
+                    {
+                        Debug.LogError(err);
+                    }
+                    
                     ctor.Dispose();
                     return true;
                 }
@@ -1612,6 +1674,11 @@ namespace FairyGUI
 
             return false;
         }
+#endif
+
+#if FAIRYGUI_PUERTS
+        public Action __onConstruct;
+        public Action __onDispose;
 #endif
     }
 }

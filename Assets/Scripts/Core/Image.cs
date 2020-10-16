@@ -24,7 +24,7 @@ namespace FairyGUI
         public Image(NTexture texture)
             : base()
         {
-            _touchDisabled = true;
+            _flags |= Flags.TouchDisabled;
 
             CreateGameObject("Image");
             graphics = new NGraphics(gameObject);
@@ -144,6 +144,9 @@ namespace FairyGUI
             get { return _fillMesh != null ? _fillMesh.amount : 0; }
             set
             {
+                if (_fillMesh == null)
+                    _fillMesh = new FillMesh();
+
                 if (_fillMesh.amount != value)
                 {
                     _fillMesh.amount = value;
@@ -237,8 +240,8 @@ namespace FairyGUI
                             && texture.nativeTexture.wrapMode == TextureWrapMode.Repeat)
                 {
                     Rect uvRect = vb.uvRect;
-                    uvRect.width *= vb.contentRect.width / texture.width;
-                    uvRect.height *= vb.contentRect.height / texture.height;
+                    uvRect.width *= vb.contentRect.width / texture.width * _textureScale.x;
+                    uvRect.height *= vb.contentRect.height / texture.height * _textureScale.y;
 
                     vb.AddQuad(vb.contentRect, vb.vertexColor, uvRect);
                     vb.AddTriangles();
