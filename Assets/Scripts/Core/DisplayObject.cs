@@ -94,6 +94,10 @@ namespace FairyGUI
         protected NGraphics.VertexMatrix _vertexMatrix;
         protected internal Flags _flags;
         protected internal float[] _batchingBounds;
+        /// <summary>
+        /// 限制到父物体的包围（用来优化组件item间 bound穿插 但图素并不穿插或可忽略时 用组件item控制合批）
+        /// </summary>
+        protected internal bool _clampInParentBound;
 
         internal static uint _gInstanceCounter;
 
@@ -1576,6 +1580,11 @@ namespace FairyGUI
         {
             if (parent != null)
                 parent.InvalidateBatchingState(true);
+        }
+
+        public void MarkOutlineChanged()
+        {
+            _flags |= Flags.OutlineChanged;
         }
 
         virtual public void Update(UpdateContext context)

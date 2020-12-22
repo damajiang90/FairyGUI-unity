@@ -1658,7 +1658,7 @@ namespace FairyGUI
         }
 
 
-if XLUA && !FAIRYGUI_TOLUA
+#if XLUA && !FAIRYGUI_TOLUA
 #if UNITY_EDITOR
         protected object _userData;
         [BlackList]

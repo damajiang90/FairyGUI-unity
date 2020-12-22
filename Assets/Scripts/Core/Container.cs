@@ -468,6 +468,16 @@ namespace FairyGUI
 
             return rect;
         }
+        
+        public Rect GetSelfBounds(DisplayObject targetSpace)
+        {
+            Vector2 v = TransformPoint(Vector2.zero, targetSpace);
+            var localScale = cachedTransform.localScale;
+            return Rect.MinMaxRect(
+                v.x, v.y,
+                v.x + _contentRect.width * localScale.x,
+                v.y + _contentRect.height * localScale.y);
+        }
 
         /// <summary>
         /// 
@@ -958,10 +968,21 @@ namespace FairyGUI
                         if (outlineChanged || (container._flags & Flags.OutlineChanged) != 0)
                         {
                             Rect rect = container.GetBounds(initiator);
-                            container._batchingBounds[0] = rect.xMin;
-                            container._batchingBounds[1] = rect.yMin;
-                            container._batchingBounds[2] = rect.xMax;
-                            container._batchingBounds[3] = rect.yMax;
+                            if(container._clampInParentBound)
+                            {
+                                Rect parentRect = GetSelfBounds(initiator);
+                                container._batchingBounds[0] = Mathf.Max(parentRect.xMin, rect.xMin);
+                                container._batchingBounds[1] = Mathf.Max(parentRect.yMin, rect.yMin);
+                                container._batchingBounds[2] = Mathf.Min(parentRect.xMax, rect.xMax);
+                                container._batchingBounds[3] = Mathf.Min(parentRect.yMax, rect.yMax);
+                            }
+                            else
+                            {
+                                container._batchingBounds[0] = rect.xMin;
+                                container._batchingBounds[1] = rect.yMin;
+                                container._batchingBounds[2] = rect.xMax;
+                                container._batchingBounds[3] = rect.yMax;
+                            }
                         }
                         if ((container._flags & Flags.BatchingRequested) != 0)
                             container.DoFairyBatching();
@@ -974,10 +995,21 @@ namespace FairyGUI
                     if (outlineChanged || (child._flags & Flags.OutlineChanged) != 0)
                     {
                         Rect rect = child.GetBounds(initiator);
-                        child._batchingBounds[0] = rect.xMin;
-                        child._batchingBounds[1] = rect.yMin;
-                        child._batchingBounds[2] = rect.xMax;
-                        child._batchingBounds[3] = rect.yMax;
+                        if(child._clampInParentBound)
+                        {
+                            Rect parentRect = GetSelfBounds(initiator);
+                            child._batchingBounds[0] = Mathf.Max(parentRect.xMin, rect.xMin);
+                            child._batchingBounds[1] = Mathf.Max(parentRect.yMin, rect.yMin);
+                            child._batchingBounds[2] = Mathf.Min(parentRect.xMax, rect.xMax);
+                            child._batchingBounds[3] = Mathf.Min(parentRect.yMax, rect.yMax);
+                        }
+                        else
+                        {
+                            child._batchingBounds[0] = rect.xMin;
+                            child._batchingBounds[1] = rect.yMin;
+                            child._batchingBounds[2] = rect.xMax;
+                            child._batchingBounds[3] = rect.yMax;
+                        }
                     }
                     initiator._descendants.Add(child);
                 }
