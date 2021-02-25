@@ -171,7 +171,8 @@ namespace FairyGUI
 
         internal void CleanupObjects()
         {
-            List<HtmlElement> elements = textField.htmlElements;
+            //修改这里获取rawElements htmlElements会生成新的东西 一般在清除这种逻辑里面 不太建议又回调到生成东西（这时候可能处于场景正在卸载，无法优雅卸载）
+            List<HtmlElement> elements = textField.rawElements;
             int count = elements.Count;
             for (int i = 0; i < count; i++)
             {

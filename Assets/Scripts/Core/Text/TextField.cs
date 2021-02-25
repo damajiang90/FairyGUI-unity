@@ -23,6 +23,7 @@ namespace FairyGUI
         int _maxWidth;
 
         List<HtmlElement> _elements;
+        internal List<HtmlElement> rawElements => _elements;
         List<LineInfo> _lines;
         List<CharPosition> _charPositions;
 
