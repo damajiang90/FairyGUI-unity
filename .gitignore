@@ -31,3 +31,7 @@ sysinfo.txt
 *.apk
 *.unitypackage
 .DS_Store
+/Assets/_TerrainAutoUpgrade.meta
+/Assets/_TerrainAutoUpgrade
+/.idea
+/Logs

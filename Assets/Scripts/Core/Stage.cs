@@ -526,7 +526,26 @@ namespace FairyGUI
 
             return null;
         }
+        
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="touchId"></param>
+        /// <returns></returns>
+        public DisplayObject GetTouchTargetObject(int touchId)
+        {
+            if (touchId < 0)
+                return null;
 
+            for (int j = 0; j < 5; j++)
+            {
+                TouchInfo touch = _touches[j];
+                if (touch.touchId == touchId)
+                    return touch.target;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// 

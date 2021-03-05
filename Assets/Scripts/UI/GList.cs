@@ -54,6 +54,10 @@ namespace FairyGUI
         /// 
         /// </summary>
         public bool scrollItemToViewOnClick;
+        /// <summary>
+        /// 默认true,当设置为false时不会自动改变如单选，多选按钮的状态，使用者可在selectedIndex等api来操作选中状态
+        /// </summary>
+        public bool changeStateOnClick = true;
 
         ListLayoutType _layout;
         int _lineCount;
@@ -1028,7 +1032,7 @@ namespace FairyGUI
         void __clickItem(EventContext context)
         {
             GObject item = context.sender as GObject;
-            if ((item is GButton) && selectionMode != ListSelectionMode.None)
+            if ((item is GButton) && selectionMode != ListSelectionMode.None && changeStateOnClick)
                 SetSelectionOnEvent(item, context.inputEvent);
 
             if (scrollPane != null && scrollItemToViewOnClick)
