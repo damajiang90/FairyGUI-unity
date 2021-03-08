@@ -54,11 +54,11 @@ namespace FairyGUI
         public static float TRIGGER = 1.5f;
         public static float INTERVAL = 1f;
 
-        public LongPressGesture(GObject host)
+        public LongPressGesture(GObject host, float trigger = 1.5f, float interval = 1f)
         {
             this.host = host;
-            trigger = TRIGGER;
-            interval = INTERVAL;
+            this.trigger = trigger;
+            this.interval = interval;
             holdRangeRadius = 50;
             Enable(true);
 
