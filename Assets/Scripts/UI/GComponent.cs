@@ -1549,6 +1549,17 @@ namespace FairyGUI
                 }
             }
 
+            if (buffer.version >= 5)
+            {
+                string str = buffer.ReadS();
+                if (!string.IsNullOrEmpty(str))
+                    this.onAddedToStage.Add(() => __playSound(str, 1));
+
+                string str2 = buffer.ReadS();
+                if (!string.IsNullOrEmpty(str2))
+                    this.onRemovedFromStage.Add(() => __playSound(str2, 1));
+            }
+
             buffer.Seek(0, 5);
 
             int transitionCount = buffer.ReadShort();
@@ -1641,6 +1652,13 @@ namespace FairyGUI
                     }
                 }
             }
+        }
+
+        void __playSound(string soundRes, float volumeScale)
+        {
+            NAudioClip sound = UIPackage.GetItemAssetByURL(soundRes) as NAudioClip;
+            if (sound != null && sound.nativeClip != null)
+                Stage.inst.PlayOneShotSound(sound.nativeClip, volumeScale);
         }
 
         void __addedToStage()
