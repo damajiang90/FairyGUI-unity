@@ -401,6 +401,8 @@ namespace FairyGUI
             get { return _playing; }
         }
 
+        public float totalDuration => _totalDuration;
+        
         /// <summary>
         /// 
         /// </summary>
