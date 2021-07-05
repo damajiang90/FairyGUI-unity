@@ -25,11 +25,6 @@ namespace FairyGUI
     public class GList : GComponent
     {
         /// <summary>
-        /// Resource url of the default item.
-        /// </summary>
-        public string defaultItem;
-
-        /// <summary>
         /// 如果true，当item不可见时自动折叠，否则依然占位
         /// </summary>
         public bool foldInvisibleItems = false;
@@ -59,6 +54,7 @@ namespace FairyGUI
         /// </summary>
         public bool changeStateOnClick = true;
 
+        string _defaultItem;
         ListLayoutType _layout;
         int _lineCount;
         int _columnCount;
@@ -144,6 +140,18 @@ namespace FairyGUI
         public EventListener onRightClickItem
         {
             get { return _onRightClickItem ?? (_onRightClickItem = new EventListener(this, "onRightClickItem")); }
+        }
+
+        /// <summary>
+        /// Resource url of the default item.
+        /// </summary>
+        public string defaultItem
+        {
+            get { return _defaultItem; }
+            set
+            {
+                _defaultItem = UIPackage.NormalizeURL(value);
+            }
         }
 
         /// <summary>
@@ -332,7 +340,7 @@ namespace FairyGUI
         public GObject GetFromPool(string url)
         {
             if (string.IsNullOrEmpty(url))
-                url = defaultItem;
+                url = _defaultItem;
 
             GObject ret = _pool.GetObject(url);
             if (ret != null)
@@ -1938,7 +1946,7 @@ namespace FairyGUI
             bool needRender;
             float deltaSize = 0;
             float firstItemDeltaSize = 0;
-            string url = defaultItem;
+            string url = _defaultItem;
             int partSize = (int)((scrollPane.viewWidth - _columnGap * (_curLineItemCount - 1)) / _curLineItemCount);
 
             itemInfoVer++;
@@ -1952,7 +1960,7 @@ namespace FairyGUI
                     {
                         url = itemProvider(curIndex % _numItems);
                         if (url == null)
-                            url = defaultItem;
+                            url = _defaultItem;
                         url = UIPackage.NormalizeURL(url);
                     }
 
@@ -2108,7 +2116,7 @@ namespace FairyGUI
             bool needRender;
             float deltaSize = 0;
             float firstItemDeltaSize = 0;
-            string url = defaultItem;
+            string url = _defaultItem;
             int partSize = (int)((scrollPane.viewHeight - _lineGap * (_curLineItemCount - 1)) / _curLineItemCount);
 
             itemInfoVer++;
@@ -2122,7 +2130,7 @@ namespace FairyGUI
                     {
                         url = itemProvider(curIndex % _numItems);
                         if (url == null)
-                            url = defaultItem;
+                            url = _defaultItem;
                         url = UIPackage.NormalizeURL(url);
                     }
 
@@ -2278,7 +2286,7 @@ namespace FairyGUI
             int startIndex = page * pageSize;
             int lastIndex = startIndex + pageSize * 2; //测试两页
             bool needRender;
-            string url = defaultItem;
+            string url = _defaultItem;
             int partWidth = (int)((scrollPane.viewWidth - _columnGap * (_curLineItemCount - 1)) / _curLineItemCount);
             int partHeight = (int)((scrollPane.viewHeight - _lineGap * (_curLineItemCount2 - 1)) / _curLineItemCount2);
             itemInfoVer++;
@@ -2342,7 +2350,7 @@ namespace FairyGUI
                         {
                             url = itemProvider(i % _numItems);
                             if (url == null)
-                                url = defaultItem;
+                                url = _defaultItem;
                             url = UIPackage.NormalizeURL(url);
                         }
 
@@ -2482,7 +2490,7 @@ namespace FairyGUI
             }
         }
 
-        override protected internal void GetSnappingPosition(ref float xValue, ref float yValue)
+        override public void GetSnappingPositionWithDir(ref float xValue, ref float yValue, float xDir, float yDir)
         {
             if (_virtual)
             {
@@ -2490,26 +2498,38 @@ namespace FairyGUI
                 {
                     float saved = yValue;
                     int index = GetIndexOnPos1(ref yValue, false);
-                    if (index < _virtualItems.Count && saved - yValue > _virtualItems[index].size.y / 2 && index < _realNumItems)
-                        yValue += _virtualItems[index].size.y + _lineGap;
+                    if (index < _virtualItems.Count && index < _realNumItems)
+                    {
+                        float size = _virtualItems[index].size.y;
+                        if (ShouldSnapToNext(yDir, saved - yValue, size))
+                            yValue += size + _lineGap;
+                    }
                 }
                 else if (_layout == ListLayoutType.SingleRow || _layout == ListLayoutType.FlowVertical)
                 {
                     float saved = xValue;
                     int index = GetIndexOnPos2(ref xValue, false);
-                    if (index < _virtualItems.Count && saved - xValue > _virtualItems[index].size.x / 2 && index < _realNumItems)
-                        xValue += _virtualItems[index].size.x + _columnGap;
+                    if (index < _virtualItems.Count && index < _realNumItems)
+                    {
+                        float size = _virtualItems[index].size.x;
+                        if (ShouldSnapToNext(xDir, saved - xValue, size))
+                            xValue += size + _columnGap;
+                    }
                 }
                 else
                 {
                     float saved = xValue;
                     int index = GetIndexOnPos3(ref xValue, false);
-                    if (index < _virtualItems.Count && saved - xValue > _virtualItems[index].size.x / 2 && index < _realNumItems)
-                        xValue += _virtualItems[index].size.x + _columnGap;
+                    if (index < _virtualItems.Count && index < _realNumItems)
+                    {
+                        float size = _virtualItems[index].size.x;
+                        if (ShouldSnapToNext(xDir, saved - xValue, size))
+                            xValue += size + _columnGap;
+                    }
                 }
             }
             else
-                base.GetSnappingPosition(ref xValue, ref yValue);
+                base.GetSnappingPositionWithDir(ref xValue, ref yValue, xDir, yDir);
         }
 
         private void HandleAlign(float contentWidth, float contentHeight)
@@ -2956,7 +2976,7 @@ namespace FairyGUI
 
             buffer.Seek(beginPos, 8);
 
-            defaultItem = buffer.ReadS();
+            _defaultItem = buffer.ReadS();
             ReadItems(buffer);
         }
 
@@ -2965,13 +2985,13 @@ namespace FairyGUI
             int itemCount = buffer.ReadShort();
             for (int i = 0; i < itemCount; i++)
             {
-                int nextPos = buffer.ReadShort();
+                int nextPos = buffer.ReadUshort();
                 nextPos += buffer.position;
 
                 string str = buffer.ReadS();
                 if (str == null)
                 {
-                    str = defaultItem;
+                    str = _defaultItem;
                     if (string.IsNullOrEmpty(str))
                     {
                         buffer.position = nextPos;

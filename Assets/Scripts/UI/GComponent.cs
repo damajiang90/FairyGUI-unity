@@ -794,6 +794,15 @@ namespace FairyGUI
             return null;
         }
 
+        /// <summary>
+        /// Returns transition list.
+        /// </summary>
+        /// <returns>Transition list</returns>
+        public List<Transition> Transitions
+        {
+            get { return _transitions; }
+        }
+
         internal void ChildStateChanged(GObject child)
         {
             if (_buildingDisplayList)
@@ -1250,7 +1259,22 @@ namespace FairyGUI
             }
         }
 
-        virtual protected internal void GetSnappingPosition(ref float xValue, ref float yValue)
+        public void GetSnappingPosition(ref float xValue, ref float yValue)
+        {
+            GetSnappingPositionWithDir(ref xValue, ref yValue, 0, 0);
+        }
+
+        protected bool ShouldSnapToNext(float dir, float delta, float size)
+        {
+            return dir < 0 && delta > UIConfig.defaultScrollSnappingThreshold * size
+                || dir > 0 && delta > (1 - UIConfig.defaultScrollSnappingThreshold) * size
+                || dir == 0 && delta > size / 2;
+        }
+
+        /**
+        * dir正数表示右移或者下移，负数表示左移或者上移
+        */
+        virtual public void GetSnappingPositionWithDir(ref float xValue, ref float yValue, float xDir, float yDir)
         {
             int cnt = _children.Count;
             if (cnt == 0)
@@ -1276,10 +1300,10 @@ namespace FairyGUI
                         else
                         {
                             GObject prev = _children[i - 1];
-                            if (yValue < prev.y + prev.height / 2) //top half part
-                                yValue = prev.y;
-                            else //bottom half part
+                            if (ShouldSnapToNext(yDir, yValue - prev.y, prev.height))
                                 yValue = obj.y;
+                            else
+                                yValue = prev.y;
                             break;
                         }
                     }
@@ -1306,10 +1330,10 @@ namespace FairyGUI
                         else
                         {
                             GObject prev = _children[i - 1];
-                            if (xValue < prev.x + prev.width / 2) // top half part
-                                xValue = prev.x;
-                            else//bottom half part
+                            if (ShouldSnapToNext(xDir, xValue - prev.x, prev.width))
                                 xValue = obj.x;
+                            else
+                                xValue = prev.x;
                             break;
                         }
                     }
@@ -1428,7 +1452,7 @@ namespace FairyGUI
             int controllerCount = buffer.ReadShort();
             for (int i = 0; i < controllerCount; i++)
             {
-                int nextPos = buffer.ReadShort();
+                int nextPos = buffer.ReadUshort();
                 nextPos += buffer.position;
 
                 Controller controller = new Controller();
@@ -1495,7 +1519,7 @@ namespace FairyGUI
 
             for (int i = 0; i < childCount; i++)
             {
-                int nextPos = buffer.ReadShort();
+                int nextPos = buffer.ReadUshort();
                 nextPos += buffer.position;
 
                 buffer.Seek(buffer.position, 3);
@@ -1509,7 +1533,7 @@ namespace FairyGUI
 
             for (int i = 0; i < childCount; i++)
             {
-                int nextPos = buffer.ReadShort();
+                int nextPos = buffer.ReadUshort();
                 nextPos += buffer.position;
 
                 child = _children[i];
@@ -1565,7 +1589,7 @@ namespace FairyGUI
             int transitionCount = buffer.ReadShort();
             for (int i = 0; i < transitionCount; i++)
             {
-                int nextPos = buffer.ReadShort();
+                int nextPos = buffer.ReadUshort();
                 nextPos += buffer.position;
 
                 Transition trans = new Transition(this);

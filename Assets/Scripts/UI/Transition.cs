@@ -404,6 +404,14 @@ namespace FairyGUI
         public float totalDuration => _totalDuration;
         
         /// <summary>
+        /// transition's total duration, maybe zero when the transition only has one frame
+        /// </summary>
+        public float totalDuration
+        {
+            get { return _totalDuration; }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="label"></param>
