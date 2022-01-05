@@ -34,4 +34,12 @@ namespace FairyGUI
         /// </summary>
         Color32 originColor { get; set; }
     }
+
+    /// <summary>
+    /// 简单线性渐变色
+    /// </summary>
+    public interface IGradientColorGear : IAdditionColorGear
+    {
+        Color[] gradientColors{ get; set; }
+    }
 }

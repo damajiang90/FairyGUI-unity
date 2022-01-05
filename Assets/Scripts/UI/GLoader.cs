@@ -7,7 +7,7 @@ namespace FairyGUI
     /// <summary>
     /// GLoader class
     /// </summary>
-    public class GLoader : GObject, IAnimationGear, IAdditionColorGear
+    public class GLoader : GObject, IAnimationGear, IGradientColorGear
     {
         /// <summary>
         /// Display an error sign if the loader fails to load the content.

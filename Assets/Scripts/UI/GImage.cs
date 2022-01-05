@@ -6,7 +6,7 @@ namespace FairyGUI
     /// <summary>
     /// GImage class.
     /// </summary>
-    public class GImage : GObject, IAdditionColorGear
+    public class GImage : GObject, IGradientColorGear
     {
         Image _content;
 
