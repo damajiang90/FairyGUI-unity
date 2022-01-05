@@ -808,6 +808,21 @@ namespace FairyGUI
             vb.AddTriangles();
             vb._isArbitraryQuad = _vertexMatrix != null;
         }
+        
+        public void OnPopulateMesh(VertexBuffer vb, Color[] gradientColors)
+        {
+            Rect rect = texture.GetDrawRect(vb.contentRect);
+            if(gradientColors != null)
+            {
+                vb.AddGradientColorsQuad(rect, vb.vertexColor, gradientColors, vb.uvRect);
+            }
+            else
+            {
+                vb.AddQuad(rect, vb.vertexColor, vb.uvRect);
+            }
+            vb.AddTriangles();
+            vb._isArbitraryQuad = vertexMatrix != null;
+        }
 
         class StencilEraser
         {

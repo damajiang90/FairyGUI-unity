@@ -12,6 +12,10 @@ namespace FairyGUI
         protected Vector2 _textureScale;
         protected int _tileGridIndice;
         protected FillMesh _fillMesh;
+        //1--2
+        //|  |
+        //0--3
+        protected Color[] _gradientColors;
 
         public Image() : this(null)
         {
@@ -72,6 +76,16 @@ namespace FairyGUI
             {
                 graphics.color = value;
                 graphics.Tint();
+            }
+        }
+
+        public Color[] gradientColors
+        {
+            get => _gradientColors;
+            set
+            {//强制meshdirty
+                _gradientColors = value;
+                graphics.SetMeshDirty();
             }
         }
 
@@ -144,9 +158,6 @@ namespace FairyGUI
             get { return _fillMesh != null ? _fillMesh.amount : 0; }
             set
             {
-                if (_fillMesh == null)
-                    _fillMesh = new FillMesh();
-
                 if (_fillMesh.amount != value)
                 {
                     _fillMesh.amount = value;
@@ -261,7 +272,9 @@ namespace FairyGUI
                 SliceFill(vb);
             }
             else
-                graphics.OnPopulateMesh(vb);
+            {
+                graphics.OnPopulateMesh(vb, _gradientColors);
+            }
         }
 
         static int[] TRIANGLES_9_GRID = new int[] {
