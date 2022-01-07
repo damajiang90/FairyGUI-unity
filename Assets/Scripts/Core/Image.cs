@@ -75,7 +75,14 @@ namespace FairyGUI
             set
             {
                 graphics.color = value;
-                graphics.Tint();
+                if(isValidGradient)
+                {
+                    graphics.TintColors(_gradientColors);
+                }
+                else
+                {
+                    graphics.Tint();
+                }
             }
         }
 
@@ -83,11 +90,23 @@ namespace FairyGUI
         {
             get => _gradientColors;
             set
-            {//强制meshdirty
-                _gradientColors = value;
-                graphics.SetMeshDirty();
+            {
+                if(_gradientColors != value)
+                {
+                    _gradientColors = value;
+                    graphics.SetMeshDirty();
+                }
+                if(isValidGradient)
+                {
+                    graphics.TintColors(_gradientColors);
+                }
             }
         }
+
+        public bool isValidGradient => _gradientColors != null &&
+                                       fillMethod == FillMethod.None &&
+                                       !_scaleByTile &&
+                                       _scale9Grid == null;
 
         /// <summary>
         /// 

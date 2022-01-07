@@ -411,6 +411,44 @@ namespace FairyGUI
             vb.End();
 #endif
         }
+        
+        public void TintColors(Color[] addtionColors)
+        {
+            if (_meshDirty)
+                return;
+            
+            int vertCount = mesh.vertexCount;
+            if (vertCount == 0)
+                return;
+            if(addtionColors == null || addtionColors.Length != vertCount)
+            {
+                Tint();
+                return;
+            }
+
+#if !UNITY_5_6_OR_NEWER
+            Color32[] colors = _colors;
+            if (colors == null)
+                colors = mesh.colors32;
+#else
+            VertexBuffer vb = VertexBuffer.Begin();
+            mesh.GetColors(vb.colors);
+            List<Color32> colors = vb.colors;
+#endif
+            for (int i = 0; i < vertCount; i++)
+            {
+                Color32 col = _color * addtionColors[i];
+                col.a = (byte)(_alpha * (hasAlphaBackup ? _alphaBackup[i] : (byte)255));
+                colors[i] = col;
+            }
+
+#if !UNITY_5_6_OR_NEWER
+            mesh.colors32 = colors;
+#else
+            mesh.SetColors(vb.colors);
+            vb.End();
+#endif
+        }
 
         void ChangeAlpha(float value)
         {
