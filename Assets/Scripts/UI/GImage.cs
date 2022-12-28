@@ -36,6 +36,16 @@ namespace FairyGUI
             }
         }
 
+        public Color[] gradientColors
+        {
+            get { return _content.gradientColors; }
+            set
+            {
+                _content.gradientColors = value;
+                UpdateGear(4);
+            }
+        }
+
         /// <summary>
         /// Flip type.
         /// </summary>

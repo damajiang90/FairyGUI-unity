@@ -274,11 +274,8 @@ namespace FairyGUI
                 gradientColors[3], uvRect);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="startVertexIndex"></param>
-        internal void FixUVForArbitraryQuad()
+        static List<Vector4> helperV4List = new List<Vector4>(4) { Vector4.zero, Vector4.zero, Vector4.zero, Vector4.zero };
+        internal List<Vector4> FixUVForArbitraryQuad()
         {
             //ref1 http://www.reedbeta.com/blog/quadrilateral-interpolation-part-1/
             //ref2 https://bitlush.com/blog/arbitrary-quadrilaterals-in-opengl-es-2-0
