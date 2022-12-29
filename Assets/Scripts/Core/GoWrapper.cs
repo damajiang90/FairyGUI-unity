@@ -172,6 +172,8 @@ namespace FairyGUI
             });
 
             _shouldCloneMaterial = _cloneMaterial;
+            if(_shouldCloneMaterial)
+                CloneMaterials();
         }
 
         void CloneMaterials()
