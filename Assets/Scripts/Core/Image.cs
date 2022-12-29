@@ -106,7 +106,7 @@ namespace FairyGUI
         public bool isValidGradient => _gradientColors != null &&
                                        fillMethod == FillMethod.None &&
                                        !_scaleByTile &&
-                                       _scale9Grid == null;
+                                       (_scale9Grid == null || _tileGridIndice == 0);
 
         /// <summary>
         /// 
@@ -390,10 +390,37 @@ namespace FairyGUI
 
             if (_tileGridIndice == 0)
             {
-                for (int cy = 0; cy < 4; cy++)
+                if(_gradientColors == null || _gradientColors.Length != 4)
                 {
-                    for (int cx = 0; cx < 4; cx++)
-                        vb.AddVert(new Vector2(gridX[cx] / _textureScale.x, gridY[cy] / _textureScale.y), vb.vertexColor, new Vector2(gridTexX[cx], gridTexY[cy]));
+                    for (int cy = 0; cy < 4; cy++)
+                    {
+                        for (int cx = 0; cx < 4; cx++)
+                            vb.AddVert(new Vector2(gridX[cx] / _textureScale.x, gridY[cy] / _textureScale.y), vb.vertexColor, new Vector2(gridTexX[cx], gridTexY[cy]));
+                    }
+                }
+                else
+                {
+                    Color lbC = _gradientColors[0];
+                    Color ltC = _gradientColors[1];
+                    Color rtC = _gradientColors[2];
+                    Color rbC = _gradientColors[3];
+                    float startX = gridX[0] / _textureScale.x;
+                    float startY = gridY[0] / _textureScale.y;
+                    float sizeX = gridX[3] / _textureScale.x - startX;
+                    float sizeY = gridY[3] / _textureScale.y - startY;
+                    for (int cy = 0; cy < 4; cy++)
+                    {
+                        for (int cx = 0; cx < 4; cx++)
+                        {
+                            Vector2 pos = new Vector2(gridX[cx] / _textureScale.x, gridY[cy] / _textureScale.y);
+                            float tx = (pos.x - startX) / sizeX;
+                            float ty = (pos.y - startY) / sizeY;
+                            Color gbc = Color.Lerp(lbC, rbC, tx);
+                            Color gtc = Color.Lerp(ltC, rtC, tx);
+                            Color gc = Color.Lerp(gtc, gbc, ty);//fgui y轴反的
+                            vb.AddVert(pos, vb.vertexColor * gc, new Vector2(gridTexX[cx], gridTexY[cy]));
+                        }
+                    }
                 }
                 vb.AddTriangles(TRIANGLES_9_GRID);
             }

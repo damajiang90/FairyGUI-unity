@@ -31,6 +31,8 @@ namespace FairyGUI.Utils
             handlers["u"] = onTag_Simple;
             handlers["sup"] = onTag_Simple;
             handlers["sub"] = onTag_Simple;
+            handlers["ruby"] = onTag_Ruby;
+            handlers["offset"] = onTag_Offset;
             handlers["color"] = onTag_COLOR;
             handlers["font"] = onTag_FONT;
             handlers["size"] = onTag_SIZE;
@@ -74,6 +76,24 @@ namespace FairyGUI.Utils
         protected string onTag_Simple(string tagName, bool end, string attr)
         {
             return end ? ("</" + tagName + ">") : ("<" + tagName + ">");
+        }
+
+        protected string onTag_Ruby(string tagName, bool end, string attr)
+        {
+            if(!end)
+            {
+                return "<ruby size=\"" + attr +"\">";
+            }
+            else
+                return "</ruby>";
+        }
+
+        protected string onTag_Offset(string tagName, bool end, string attr)
+        {
+            if (!end)
+                return "<ruby offset=\"" + attr + "\">";
+            else
+                return "</ruby>";
         }
 
         protected string onTag_COLOR(string tagName, bool end, string attr)

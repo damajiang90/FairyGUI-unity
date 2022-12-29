@@ -10,6 +10,7 @@ namespace FairyGUI
         public static bool disableAllTweenEffect = false;
 
         protected GObject _owner;
+        public GObject owner => _owner;
         protected Controller _controller;
         protected GearTweenConfig _tweenConfig;
 

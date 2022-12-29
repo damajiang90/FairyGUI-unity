@@ -2961,7 +2961,7 @@ namespace FairyGUI
             {
                 int i1 = buffer.ReadInt();
                 int i2 = buffer.ReadInt();
-                this.clipSoftness = new Vector2(i1, i2);
+                this.clipSoftness = new Vector4(i1, i2, i1, i2);
             }
 
             if (buffer.version >= 2)

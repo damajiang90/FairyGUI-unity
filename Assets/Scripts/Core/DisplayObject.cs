@@ -545,6 +545,9 @@ namespace FairyGUI
             }
         }
 
+#if UNITY_EDITOR
+        private string _cacheEditorName;
+#endif
         /// <summary>
         /// 
         /// </summary>
@@ -552,6 +555,17 @@ namespace FairyGUI
         /// <param name="yv"></param>
         public void SetScale(float xv, float yv)
         {
+#if UNITY_EDITOR
+            if(!cachedTransform)
+            {
+                Debug.LogErrorFormat("UI物体已被销毁，仍在设置scale:{0}", _cacheEditorName);
+                return;
+            }
+            else
+            {
+                _cacheEditorName = gOwner?.name;
+            }
+#endif
             Vector3 v = new Vector3();
             v.x = v.z = ValidateScale(xv);
             v.y = ValidateScale(yv);

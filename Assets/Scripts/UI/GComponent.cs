@@ -40,7 +40,7 @@ namespace FairyGUI
         protected int _apexIndex;
         internal Vector2 _alignOffset;
 
-        Vector2 _clipSoftness;
+        Vector4 _clipSoftness;
         int _sortingChildCount;
         Action _buildDelegate;
         Controller _applyingController;
@@ -986,7 +986,7 @@ namespace FairyGUI
         /// <summary>
         /// If clipping softness is set, clipped containers will have soft border effect.
         /// </summary>
-        public Vector2 clipSoftness
+        public Vector4 clipSoftness
         {
             get { return _clipSoftness; }
             set
@@ -994,8 +994,8 @@ namespace FairyGUI
                 _clipSoftness = value;
                 if (scrollPane != null)
                     scrollPane.UpdateClipSoft();
-                else if (_clipSoftness.x > 0 || _clipSoftness.y > 0)
-                    rootContainer.clipSoftness = new Vector4(value.x, value.y, value.x, value.y);
+                else if (_clipSoftness.x > 0 || _clipSoftness.y > 0 || _clipSoftness.z > 0 || _clipSoftness.w > 0)
+                    rootContainer.clipSoftness = _clipSoftness;
                 else
                     rootContainer.clipSoftness = null;
             }
@@ -1442,7 +1442,7 @@ namespace FairyGUI
             {
                 int i1 = buffer.ReadInt();
                 int i2 = buffer.ReadInt();
-                this.clipSoftness = new Vector2(i1, i2);
+                this.clipSoftness = new Vector4(i1, i2, i1, i2);
             }
 
             _buildingDisplayList = true;

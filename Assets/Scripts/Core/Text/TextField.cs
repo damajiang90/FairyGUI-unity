@@ -710,6 +710,26 @@ namespace FairyGUI
 #endif
             }
         }
+        
+        public static HashSet<char> forceNextNewLineChars = new HashSet<char>()
+        {
+            '。','，','、','！','？','%'
+        };
+        float GetNextForceNewLineWidth(int curIndex, int charLength)
+        {
+            if(forceNextNewLineChars != null && curIndex < charLength - 1)
+            {
+                char nextChar = _parsedText[curIndex + 1];
+                if(forceNextNewLineChars.Contains(nextChar))
+                {
+                    if(_font.GetGlyph(nextChar, out var w, out _, out _))
+                    {
+                        return w;
+                    }
+                }
+            }
+            return 0;
+        }
 
         void BuildLines2()
         {
@@ -820,7 +840,8 @@ namespace FairyGUI
                         wordPossible = true;
                     }
                     else if (format.specialStyle == TextFormat.SpecialStyle.Subscript
-                        || format.specialStyle == TextFormat.SpecialStyle.Superscript)
+                        || format.specialStyle == TextFormat.SpecialStyle.Superscript
+                        || format.specialStyle == TextFormat.SpecialStyle.Topscript)
                     {
                         if (sLineChars.Count > 0)
                         {
@@ -862,7 +883,7 @@ namespace FairyGUI
                     posx = 0;
                     line = newLine;
                 }
-                else if (posx > rectWidth)
+                else if (posx + GetNextForceNewLineWidth(charIndex, textLength) > rectWidth)
                 {
                     if (wrap)
                     {
@@ -1122,6 +1143,9 @@ namespace FairyGUI
             bool lineClipped;
             AlignType lineAlign;
             float glyphWidth, glyphHeight, baseline;
+            float lastGlyphWidth = 0;
+            bool lastGlyphTop = false;
+            float lastCharX = 0;
             short vertCount;
             float underlineStart;
             float strikethroughStart;
@@ -1353,7 +1377,27 @@ namespace FairyGUI
                             }
                         }
 
-                        vertCount = (short)_font.DrawGlyph(posx, -(line.y + line.baseline), vertList, uvList, uv2List, colList);
+                        float posy;
+                        if (format.specialStyle == TextFormat.SpecialStyle.Topscript)
+                        {
+                            if(!lastGlyphTop)
+                            {
+                                lastCharX = posx;
+                                posx -= lastGlyphWidth * format.offset;
+                            }
+                            lastGlyphWidth = glyphWidth;
+                            lastGlyphTop = true;
+                            posy = -(line.y + baseline);
+                        }
+                        else
+                        {
+                            if (lastGlyphTop)
+                                posx = lastCharX;
+                            lastGlyphTop = false;
+                            lastGlyphWidth = glyphWidth;
+                            posy = -(line.y + line.baseline);
+                        }
+                        vertCount = (short)_font.DrawGlyph(posx, posy, vertList, uvList, uv2List, colList);
 
                         if (_charPositions != null)
                         {
@@ -1481,6 +1525,7 @@ namespace FairyGUI
                     float outline = _textFormat.outline;
                     if (outline != 0)
                     {
+                        if(col.a != 255) vb._alphaInVertexColor = true;
                         for (int j = 0; j < drawDirs; j++)
                         {
                             for (int i = 0; i < count; i++)
@@ -1499,6 +1544,7 @@ namespace FairyGUI
                     if (hasShadow)
                     {
                         col = _textFormat.shadowColor;
+                        if(col.a != 255) vb._alphaInVertexColor = true;
                         Vector2 offset = _textFormat.shadowOffset;
                         for (int i = 0; i < count; i++)
                         {

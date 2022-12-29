@@ -95,6 +95,61 @@ namespace FairyGUI
 
             OnEnd = null;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="container"></param>
+        public void EnterClipping(Container container)
+        {
+            if(container.clipRect != null)
+            {
+                uint clipId = container.id;
+                Rect clipRect = container.TransformRect((Rect)container.clipRect, null);
+                _clipStack.Push(clipInfo);
+
+                if (rectMaskDepth > 0)
+                    clipRect = ToolSet.Intersection(ref clipInfo.rect, ref clipRect);
+
+                clipped = true;
+                clipInfo.rectMaskDepth = ++rectMaskDepth;
+
+                /* clipPos = xy * clipBox.zw + clipBox.xy
+                    * 利用这个公式，使clipPos变为当前顶点距离剪切区域中心的距离值，剪切区域的大小为2x2
+                    * 那么abs(clipPos)>1的都是在剪切区域外
+                    */
+
+                clipInfo.rect = clipRect;
+                clipRect.x = clipRect.x + clipRect.width * 0.5f;
+                clipRect.y = clipRect.y + clipRect.height * 0.5f;
+                clipRect.width *= 0.5f;
+                clipRect.height *= 0.5f;
+                if (clipRect.width == 0 || clipRect.height == 0)
+                    clipInfo.clipBox = new Vector4(-2, -2, 0, 0);
+                else
+                    clipInfo.clipBox = new Vector4(-clipRect.x / clipRect.width, -clipRect.y / clipRect.height,
+                        1.0f / clipRect.width, 1.0f / clipRect.height);
+                clipInfo.clipId = clipId;
+                clipInfo.soft = container.clipSoftness != null;// && clipRect.width > 0 && clipRect.height > 0;
+                if (clipInfo.soft)
+                {
+                    var softness = (Vector4)container.clipSoftness;
+                    Vector3 scale = container.cachedTransform.lossyScale;
+                    softness.x *= scale.x;
+                    softness.y *= scale.y;
+                    softness.z *= scale.x;
+                    softness.w *= scale.y;
+                    float vx = clipRect.width;
+                    float vy = clipRect.height;
+                    softness.x = Mathf.Clamp01(softness.x / vx);
+                    softness.y = Mathf.Clamp01(softness.y / vy);
+                    softness.z = Mathf.Clamp01(softness.z / vx);
+                    softness.w = Mathf.Clamp01(softness.w / vy);
+
+                    clipInfo.softness = softness;
+                }
+            }
+        }
 
         /// <summary>
         /// 

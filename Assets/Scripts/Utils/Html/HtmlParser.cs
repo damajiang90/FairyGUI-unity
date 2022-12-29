@@ -11,6 +11,7 @@ namespace FairyGUI.Utils
     public class HtmlParser
     {
         public static HtmlParser inst = new HtmlParser();
+        public static float defaultRubyOffset = 1f;
 
         protected class TextFormat2 : TextFormat
         {
@@ -127,7 +128,21 @@ namespace FairyGUI.Utils
                                 PopTextFormat();
                         }
                         break;
-
+                    
+                    case "ruby":
+                        {
+                            if (XMLIterator.tagType == XMLTagType.Start)
+                            {
+                                PushTextFormat();
+                                _format.specialStyle = TextFormat.SpecialStyle.Topscript;
+                                _format.offset = XMLIterator.GetAttributeFloat("offset", defaultRubyOffset);
+                                _format.size = XMLIterator.GetAttributeInt("size", _format.size);
+                            }
+                            else
+                                PopTextFormat();
+                        }
+                        break;
+                    
                     case "font":
                         if (XMLIterator.tagType == XMLTagType.Start)
                         {

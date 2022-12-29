@@ -774,8 +774,10 @@ namespace FairyGUI
                 if (_mask.graphics != null)
                     _mask.graphics._PreUpdateMask(context, _mask.id);
             }
-            else if (_clipRect != null)
-                context.EnterClipping(this.id, this.TransformRect((Rect)_clipRect, null), clipSoftness);
+            /*else if (_clipRect != null)
+                context.EnterClipping(this.id, this.TransformRect((Rect)_clipRect, null), clipSoftness);*/
+            else
+                context.EnterClipping(this);
 
             float savedAlpha = context.alpha;
             context.alpha *= this.alpha;

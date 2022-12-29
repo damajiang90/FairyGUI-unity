@@ -41,6 +41,9 @@ namespace FairyGUI
         float _xPos;
         float _yPos;
 
+        bool isHScrollValid => !_displayInDemand || !_hScrollNone;
+        bool isVScrollValid => !_displayInDemand || !_vScrollNone;
+
         Vector2 _viewSize;
         Vector2 _contentSize;
         Vector2 _overlapSize;
@@ -83,6 +86,7 @@ namespace FairyGUI
         EventListener _onPullDownRelease;
         EventListener _onPullUpRelease;
 
+        internal static bool anyTweenUpdateDirty;//外部重置
         static int _gestureFlag;
 
         public static float TWEEN_TIME_GO = 0.3f; //调用SetPos(ani)时使用的缓动时间
@@ -1465,7 +1469,7 @@ namespace FairyGUI
                     }
                 }
 
-                sv = true;
+                sv = isVScrollValid;
             }
             else if (_scrollType == ScrollType.Horizontal)
             {
@@ -1485,7 +1489,7 @@ namespace FairyGUI
                     }
                 }
 
-                sh = true;
+                sh = isHScrollValid;
             }
             else
             {
@@ -1502,7 +1506,8 @@ namespace FairyGUI
                     }
                 }
 
-                sv = sh = true;
+                sh = isHScrollValid;
+                sv = isVScrollValid;
             }
 
             Vector2 newPos = _containerPos + pt - _beginTouchPos;
@@ -1581,6 +1586,8 @@ namespace FairyGUI
             _lastTouchPos = pt;
             _lastTouchGlobalPos = evt.position;
             _lastMoveTime = Time.unscaledTime;
+            var lastXPos = _xPos;
+            var lastYPos = _yPos;
 
             //同步更新pos值
             if (_overlapSize.x > 0)
@@ -1605,6 +1612,7 @@ namespace FairyGUI
             if (_pageMode)
                 UpdatePageController();
             _onScroll.Call();
+            anyTweenUpdateDirty = Mathf.Abs(lastXPos - _xPos) > Mathf.Epsilon || Mathf.Abs(lastYPos - _yPos) > Mathf.Epsilon;
         }
 
         private void __touchEnd(EventContext context)
@@ -1747,14 +1755,14 @@ namespace FairyGUI
 
         internal void UpdateClipSoft()
         {
-            Vector2 softness = _owner.clipSoftness;
-            if (softness.x != 0 || softness.y != 0)
+            Vector4 softness = _owner.clipSoftness;
+            if (softness.x != 0 || softness.y != 0 || softness.z != 0 || softness.w != 0)
             {
                 _maskContainer.clipSoftness = new Vector4(
                     (_container.x >= 0 || !_softnessOnTopOrLeftSide) ? 0 : softness.x,
                     (_container.y >= 0 || !_softnessOnTopOrLeftSide) ? 0 : softness.y,
-                    (-_container.x - _overlapSize.x >= 0) ? 0 : softness.x,
-                    (-_container.y - _overlapSize.y >= 0) ? 0 : softness.y);
+                    (-_container.x - _overlapSize.x >= 0) ? 0 : softness.z,
+                    (-_container.y - _overlapSize.y >= 0) ? 0 : softness.w);
             }
             else
                 _maskContainer.clipSoftness = null;
@@ -2205,6 +2213,7 @@ namespace FairyGUI
                 Timers.inst.Remove(_tweenUpdateDelegate);
                 return;
             }
+            anyTweenUpdateDirty = true;
 
             float nx = RunTween(0);
             float ny = RunTween(1);

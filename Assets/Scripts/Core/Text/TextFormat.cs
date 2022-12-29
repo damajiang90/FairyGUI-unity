@@ -11,7 +11,8 @@ namespace FairyGUI
         {
             None,
             Superscript,
-            Subscript
+            Subscript,
+            Topscript
         }
 
         /// <summary>
@@ -93,6 +94,7 @@ namespace FairyGUI
         /// 
         /// </summary>
         public Color shadowColor;
+        public float offset;
 
         public TextFormat()
         {
@@ -157,6 +159,7 @@ namespace FairyGUI
                 this.gradientColor = null;
             this.align = source.align;
             this.specialStyle = source.specialStyle;
+            this.offset = source.offset;
         }
 
         public void FillVertexColors(Color32[] vertexColors)

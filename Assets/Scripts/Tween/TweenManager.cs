@@ -6,6 +6,7 @@ namespace FairyGUI
     internal static class TweenManager
     {
         static GTweener[] _activeTweens = new GTweener[30];
+        internal static GTweener[] activeTweens => _activeTweens;
         static List<GTweener> _tweenerPool = new List<GTweener>(30);
         static int _totalActiveTweens = 0;
         static bool _inited = false;

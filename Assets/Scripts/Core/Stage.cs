@@ -37,6 +37,7 @@ namespace FairyGUI
         List<DisplayObject> _rollOverChain;
         TouchInfo[] _touches;
         int _touchCount;
+        bool _touchClickCanceled;
         Vector2 _touchPosition;
         int _frameGotHitTarget;
         int _frameGotTouchPosition;
@@ -599,6 +600,29 @@ namespace FairyGUI
                 TouchInfo touch = _touches[j];
                 if (touch.touchId == touchId)
                     touch.clickCancelled = true;
+            }
+        }
+
+        public void CancelClickExcept(int touchId)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                TouchInfo touch = _touches[j];
+                if (touch.touchId != touchId)
+                    touch.clickCancelled = true;
+            }
+        }
+
+        public void CancelAllClick()
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                TouchInfo touch = _touches[j];
+                touch.clickCancelled = true;
+            }
+            if(!_customInput && touchScreen)
+            {
+                _touchClickCanceled = true;
             }
         }
 
@@ -1167,6 +1191,10 @@ namespace FairyGUI
 
                         touch.UpdateEvent();
                         touch.target.BubbleEvent("onTouchBegin", touch.evt);
+                        if(_touchClickCanceled)
+                        {
+                            touch.clickCancelled = true;
+                        }
                     }
                 }
                 else if (uTouch.phase == TouchPhase.Canceled || uTouch.phase == TouchPhase.Ended)
@@ -1175,6 +1203,10 @@ namespace FairyGUI
                     {
                         _touchCount--;
                         touch.End();
+                        if(_touchClickCanceled)
+                        {
+                            touch.clickCancelled = true;
+                        }
 
                         if (uTouch.phase != TouchPhase.Canceled)
                         {
@@ -1194,6 +1226,7 @@ namespace FairyGUI
                     }
                 }
             }
+            _touchClickCanceled = false;
         }
 
         void HandleRollOver(TouchInfo touch)

@@ -31,7 +31,9 @@ namespace FairyGUI
         public bool invalidateBatchingEveryFrame;
 
         GComponent _owner;
+        public GComponent owner => _owner;
         TransitionItem[] _items;
+        internal TransitionItem[] items => _items;
         int _totalTimes;
         int _totalTasks;
         bool _playing;
@@ -43,8 +45,11 @@ namespace FairyGUI
         bool _reversed;
         float _totalDuration;
         bool _autoPlay;
+        public bool autoPlay => _autoPlay;
         int _autoPlayTimes;
+        public int autoPlayTimes => _autoPlayTimes;
         float _autoPlayDelay;
+        public float autoPlayDelay => _autoPlayDelay;
         float _timeScale;
         bool _ignoreEngineTimeScale;
         float _startTime;
@@ -400,6 +405,7 @@ namespace FairyGUI
         {
             get { return _playing; }
         }
+        public bool paused => _paused;
 
         /// <summary>
         /// transition's total duration, maybe zero when the transition only has one frame

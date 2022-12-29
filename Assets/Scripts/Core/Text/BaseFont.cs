@@ -56,8 +56,9 @@ namespace FairyGUI
 
         protected internal static bool textRebuildFlag;
 
-        protected const float SupScale = 0.58f;
-        protected const float SupOffset = 0.33f;
+        public static float SupScale = 0.58f;
+        public static float SupOffset = 0.1f;
+        public static float RubyOffset = 0.1f;
 
         virtual public void UpdateGraphics(NGraphics graphics)
         {

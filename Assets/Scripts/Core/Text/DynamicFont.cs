@@ -78,7 +78,7 @@ namespace FairyGUI
             float size = format.size * fontSizeScale;
             if (keepCrisp)
                 size *= UIContentScaler.scaleFactor;
-            if (_format.specialStyle == TextFormat.SpecialStyle.Subscript || _format.specialStyle == TextFormat.SpecialStyle.Superscript)
+            if (_format.specialStyle == TextFormat.SpecialStyle.Subscript || _format.specialStyle == TextFormat.SpecialStyle.Superscript || _format.specialStyle == TextFormat.SpecialStyle.Topscript)
                 size *= SupScale;
             _size = Mathf.FloorToInt(size);
             if (_size == 0)
@@ -147,6 +147,11 @@ namespace FairyGUI
                 height = height / SupScale + baseline * SupOffset;
                 baseline *= (SupOffset + 1 / SupScale);
             }
+            else if (_format.specialStyle == TextFormat.SpecialStyle.Topscript)
+            {
+                height = height / SupScale + baseline * RubyOffset;
+                baseline *= (RubyOffset + 1 / SupScale);
+            }
 
             height = Mathf.RoundToInt(height);
             baseline = Mathf.RoundToInt(baseline);
@@ -201,6 +206,8 @@ namespace FairyGUI
                 y = y - Mathf.RoundToInt(_ascent * _scale * SupOffset);
             else if (_format.specialStyle == TextFormat.SpecialStyle.Superscript)
                 y = y + Mathf.RoundToInt(_ascent * _scale * (1 / SupScale - 1 + SupOffset));
+            else if (_format.specialStyle == TextFormat.SpecialStyle.Topscript)
+                y = y + Mathf.RoundToInt(_ascent * _scale * (1 / SupScale - 1 + RubyOffset));
 
             topLeft.x += x;
             topLeft.y += y;

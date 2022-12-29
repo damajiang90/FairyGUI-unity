@@ -10,6 +10,7 @@ namespace FairyGUI
     public class TypingEffect
     {
         protected TextField _textField;
+        public TextField textField => _textField;
         protected Vector3[] _backupVerts;
         protected Vector3[] _vertices;
 
