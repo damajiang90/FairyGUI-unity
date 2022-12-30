@@ -231,7 +231,7 @@ namespace FairyGUI
         {
             get
             {
-                if (_customMatarial == 0 && _material == null && _manager != null)
+                if (_customMatarial == 0 && _material is null && _manager != null)
                     _material = _manager.GetMaterial(_materialFlags, blendMode, 0);
                 return _material;
             }

@@ -113,12 +113,10 @@ namespace FairyGUI
 
                 clipped = true;
                 clipInfo.rectMaskDepth = ++rectMaskDepth;
-
                 /* clipPos = xy * clipBox.zw + clipBox.xy
                     * 利用这个公式，使clipPos变为当前顶点距离剪切区域中心的距离值，剪切区域的大小为2x2
                     * 那么abs(clipPos)>1的都是在剪切区域外
                     */
-
                 clipInfo.rect = clipRect;
                 clipRect.x = clipRect.x + clipRect.width * 0.5f;
                 clipRect.y = clipRect.y + clipRect.height * 0.5f;
@@ -130,7 +128,7 @@ namespace FairyGUI
                     clipInfo.clipBox = new Vector4(-clipRect.x / clipRect.width, -clipRect.y / clipRect.height,
                         1.0f / clipRect.width, 1.0f / clipRect.height);
                 clipInfo.clipId = clipId;
-                clipInfo.soft = container.clipSoftness != null;// && clipRect.width > 0 && clipRect.height > 0;
+                clipInfo.soft = container.clipSoftness != null;
                 if (clipInfo.soft)
                 {
                     var softness = (Vector4)container.clipSoftness;
@@ -141,10 +139,25 @@ namespace FairyGUI
                     softness.w *= scale.y;
                     float vx = clipRect.width;
                     float vy = clipRect.height;
-                    softness.x = Mathf.Clamp01(softness.x / vx);
-                    softness.y = Mathf.Clamp01(softness.y / vy);
-                    softness.z = Mathf.Clamp01(softness.z / vx);
-                    softness.w = Mathf.Clamp01(softness.w / vy);
+                    if (softness.x > 0)
+                        softness.x = vx / softness.x;
+                    else
+                        softness.x = 10000f;
+
+                    if (softness.y > 0)
+                        softness.y = vy / softness.y;
+                    else
+                        softness.y = 10000f;
+
+                    if (softness.z > 0)
+                        softness.z = vx / softness.z;
+                    else
+                        softness.z = 10000f;
+
+                    if (softness.w > 0)
+                        softness.w = vy / softness.w;
+                    else
+                        softness.w = 10000f;
 
                     clipInfo.softness = softness;
                 }

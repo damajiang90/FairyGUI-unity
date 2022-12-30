@@ -853,10 +853,7 @@ namespace FairyGUI
         {
             get
             {
-                if (graphics != null)
-                    return graphics.material;
-                else
-                    return null;
+                return graphics?.material;
             }
             set
             {
