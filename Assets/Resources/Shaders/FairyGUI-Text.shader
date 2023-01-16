@@ -6,6 +6,8 @@ Shader "FairyGUI/Text"
     Properties
     {
         _MainTex ("Alpha (A)", 2D) = "white" {}
+        [PerRendererData]_ClipBox ("ClipBox", Vector) = (-2, -2, 0, 0)
+        [PerRendererData]_ClipSoftness ("ClipSoftness", Vector) = (0, 0, 0, 0)
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0

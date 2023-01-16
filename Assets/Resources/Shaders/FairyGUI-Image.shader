@@ -6,6 +6,8 @@ Shader "FairyGUI/Image"
     Properties
     {
         _MainTex ("Base (RGB), Alpha (A)", 2D) = "black" {}
+        [PerRendererData]_ClipBox ("ClipBox", Vector) = (-2, -2, 0, 0)
+        [PerRendererData]_ClipSoftness ("ClipSoftness", Vector) = (0, 0, 0, 0)
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -15,8 +17,8 @@ Shader "FairyGUI/Image"
 
         _ColorMask ("Color Mask", Float) = 15
 
-        _BlendSrcFactor ("Blend SrcFactor", Float) = 5
-        _BlendDstFactor ("Blend DstFactor", Float) = 10
+        [Enum(UnityEngine.Rendering.BlendMode)]_BlendSrcFactor ("Blend SrcFactor", Float) = 5
+        [Enum(UnityEngine.Rendering.BlendMode)]_BlendDstFactor ("Blend DstFactor", Float) = 10
     }
     
     SubShader
