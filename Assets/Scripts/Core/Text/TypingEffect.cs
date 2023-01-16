@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +26,7 @@ namespace FairyGUI
         protected int _mainLayerVertCount;
 
         protected bool _started;
+        protected Action _onComplete;
 
         /// <summary>
         /// 
@@ -47,6 +49,16 @@ namespace FairyGUI
             else
                 _textField = (TextField)textField.displayObject;
             _textField.EnableCharPositionSupport();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="textField"></param>
+        /// <param name="onComplete"></param>
+        public TypingEffect(GTextField textField, Action onComplete) : this(textField)
+        {
+            _onComplete = onComplete;
         }
 
         /// <summary>
@@ -155,6 +167,9 @@ namespace FairyGUI
 
         private void output(int vertCount)
         {
+            if (!_started)
+                return;
+
             int start, end;
 
             start = _mainLayerStart + _vertIndex;
@@ -216,9 +231,15 @@ namespace FairyGUI
             if (!_started)
                 return;
 
+            _onComplete?.Invoke();
             _started = false;
             _textField.graphics.meshModifier -= OnMeshModified;
             _textField.graphics.SetMeshDirty();
+        }
+        
+        public void RemoveCallback()
+        {
+            _onComplete = null;
         }
 
         /// <summary>

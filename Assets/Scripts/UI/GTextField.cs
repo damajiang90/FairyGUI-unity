@@ -274,6 +274,19 @@ namespace FairyGUI
         /// <summary>
         /// 
         /// </summary>
+        public Color shadowColor
+        {
+            get { return _textField.shadowColor; }
+            set
+            {
+                _textField.shadowColor = value;
+                UpdateGear(4);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public bool UBBEnabled
         {
             get { return _ubbEnabled; }

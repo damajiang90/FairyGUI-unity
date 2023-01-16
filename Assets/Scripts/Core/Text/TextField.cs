@@ -303,6 +303,22 @@ namespace FairyGUI
             }
         }
 
+        public Color shadowColor
+        {
+            get
+            {
+                return _textFormat.shadowColor;
+            }
+            set
+            {
+                if (_textFormat.shadowColor != value)
+                {
+                    _textFormat.shadowColor = value;
+                    graphics.SetMeshDirty();
+                }
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>

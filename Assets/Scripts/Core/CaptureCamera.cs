@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace FairyGUI
 {
@@ -17,9 +18,43 @@ namespace FairyGUI
         /// </summary>
         [System.NonSerialized]
         public Camera cachedCamera;
+        
 
         [System.NonSerialized]
         static CaptureCamera _main;
+
+        static CameraOverrideOption _requiresColorOption = CameraOverrideOption.Off;
+        public static CameraOverrideOption requiresColorOption
+        {
+            get => _requiresColorOption;
+            set
+            {
+                if(_requiresColorOption != value)
+                {
+                    _requiresColorOption = value;
+                    if(_main && _main.cachedCamera)
+                    {
+                        _main.cachedCamera.GetUniversalAdditionalCameraData().requiresColorOption = value;
+                    }
+                }
+            }
+        }
+        static CameraOverrideOption _requiresDepthOption = CameraOverrideOption.Off;
+        public static CameraOverrideOption requiresDepthOption
+        {
+            get => _requiresDepthOption;
+            set
+            {
+                if(_requiresDepthOption != value)
+                {
+                    _requiresDepthOption = value;
+                    if(_main && _main.cachedCamera)
+                    {
+                        _main.cachedCamera.GetUniversalAdditionalCameraData().requiresDepthOption = value;
+                    }
+                }
+            }
+        }
 
         [System.NonSerialized]
         static int _layer = -1;
@@ -72,6 +107,12 @@ namespace FairyGUI
             camera.allowHDR = false;
             camera.allowMSAA = false;
 #endif
+            var cameraData = camera.GetUniversalAdditionalCameraData();
+            if(cameraData != null)
+            {
+                cameraData.requiresColorOption = _requiresDepthOption;
+                cameraData.requiresDepthOption = _requiresDepthOption;
+            }
             cameraObject.AddComponent<CaptureCamera>();
         }
 

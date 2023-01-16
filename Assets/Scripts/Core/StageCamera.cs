@@ -40,6 +40,8 @@ namespace FairyGUI
         /// </summary>
         [NonSerialized]
         public static Camera main;
+        [NonSerialized]
+        public static StageCamera mainIns;
 
         /// <summary>
         /// 
@@ -52,6 +54,17 @@ namespace FairyGUI
 
         public static float DefaultCameraSize = 5;
         public static float DefaultUnitsPerPixel = 0.02f;
+        public static float mainUnitsPerPixel
+        {
+            get
+            {
+                if(mainIns != null)
+                {
+                    return mainIns.unitsPerPixel;
+                }
+                return DefaultUnitsPerPixel;
+            }
+        }
 
         void OnEnable()
         {
@@ -61,6 +74,7 @@ namespace FairyGUI
             {
                 main = cachedCamera;
                 isMain = true;
+                mainIns = this;
             }
 
             if (Display.displays.Length > 1 && cachedCamera.targetDisplay != 0 && cachedCamera.targetDisplay < Display.displays.Length)

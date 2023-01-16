@@ -84,6 +84,31 @@ namespace FairyGUI
 
         List<Renderer> _renders;
 
+        private float _customFitScale = 1f;
+        public float customFitScale
+        {
+            get => _customFitScale;
+            set
+            {
+                if(_customFitScale != value)
+                {
+                    _customFitScale = value;
+                    var _scale = 1 / value;
+                    scale = new Vector3(_scale, _scale, _scale);
+                    if(_ui != null)
+                    {
+                        _ui.scale = scale;
+                        HandleScreenSizeChanged();
+                    }
+                }
+            }
+        }
+
+        float GetCustomFitSize(float size)
+        {
+            return Mathf.Round(size * _customFitScale);
+        }
+
         void OnEnable()
         {
             if (Application.isPlaying)
@@ -423,7 +448,7 @@ namespace FairyGUI
                 switch (fitScreen)
                 {
                     case FitScreen.FitSize:
-                        _ui.SetSize(width, height);
+                        _ui.SetSize(GetCustomFitSize(width), GetCustomFitSize(height));
                         _ui.SetXY(0, 0, true);
                         break;
 
