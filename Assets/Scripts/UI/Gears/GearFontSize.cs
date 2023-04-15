@@ -10,6 +10,42 @@ namespace FairyGUI
     {
         Dictionary<string, int> _storage;
         int _default;
+        int textFontSize
+        {
+            get
+            {
+                if(_owner is GTextField textField)
+                {
+                    return textField.textFormat.size;
+                }
+                else if(_owner is GLabel label)
+                {
+                    return label.titleFontSize;
+                }
+                else if(_owner is GButton button)
+                {
+                    return button.titleFontSize;
+                }
+                return 0;
+            }
+            set
+            {
+                if(_owner is GTextField textField)
+                {
+                    TextFormat format = textField.textFormat;
+                    format.size = value;
+                    textField.textFormat = format;
+                }
+                else if(_owner is GLabel label)
+                {
+                    label.titleFontSize = value;
+                }
+                else if(_owner is GButton button)
+                {
+                    button.titleFontSize = value;
+                }
+            }
+        }
 
         public GearFontSize(GObject owner)
             : base(owner)
@@ -18,7 +54,7 @@ namespace FairyGUI
 
         protected override void Init()
         {
-            _default = ((GTextField)_owner).textFormat.size;
+            _default = textFontSize;
             _storage = new Dictionary<string, int>();
         }
 
@@ -38,16 +74,14 @@ namespace FairyGUI
             if (!_storage.TryGetValue(_controller.selectedPageId, out cv))
                 cv = _default;
 
-            TextFormat tf = ((GTextField)_owner).textFormat;
-            tf.size = cv;
-            ((GTextField)_owner).textFormat = tf;
+            textFontSize = cv;
 
             _owner._gearLocked = false;
         }
 
         override public void UpdateState()
         {
-            _storage[_controller.selectedPageId] = ((GTextField)_owner).textFormat.size;
+            _storage[_controller.selectedPageId] = textFontSize;
         }
     }
 }
