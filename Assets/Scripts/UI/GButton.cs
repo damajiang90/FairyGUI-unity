@@ -8,6 +8,7 @@ namespace FairyGUI
     /// </summary>
     public class GButton : GComponent, IColorGear
     {
+        public static bool ignoreTextDownEffect = false;
         /// <summary>
         /// Play sound when button is clicked.
         /// </summary>
@@ -380,7 +381,7 @@ namespace FairyGUI
                     {
                         GObject obj = this.GetChildAt(i);
                         IColorGear colorGear = obj as IColorGear;
-                        if(colorGear != null && !(obj is GTextField))
+                        if(colorGear != null && (!ignoreTextDownEffect || !(obj is GTextField)))
                         {
                             IAdditionColorGear additionColorGear = colorGear as IAdditionColorGear;
                             Color targetColor = additionColorGear != null ? (Color)additionColorGear.originColor : Color.white;
@@ -397,7 +398,7 @@ namespace FairyGUI
                     {
                         GObject obj = this.GetChildAt(i);
                         IColorGear colorGear = obj as IColorGear;
-                        if(colorGear != null && !(obj is GTextField))
+                        if(colorGear != null && (!ignoreTextDownEffect ||  !(obj is GTextField)))
                         {
                             IAdditionColorGear additionColorGear = colorGear as IAdditionColorGear;
                             Color originColor = additionColorGear != null ? (Color)additionColorGear.originColor : Color.white;

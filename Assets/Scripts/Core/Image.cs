@@ -7,6 +7,7 @@ namespace FairyGUI
     /// </summary>
     public class Image : DisplayObject, IMeshFactory
     {
+        public static bool fillMeshCompatEmpty = false;
         protected Rect? _scale9Grid;
         protected bool _scaleByTile;
         protected Vector2 _textureScale;
@@ -16,6 +17,8 @@ namespace FairyGUI
         //|  |
         //0--3
         protected Color[] _gradientColors;
+        protected bool _fillAsPivot;
+        protected Vector2? _customFillPivot;
 
         public Image() : this(null)
         {
@@ -108,6 +111,35 @@ namespace FairyGUI
                                        !_scaleByTile &&
                                        (_scale9Grid == null || _tileGridIndice == 0);
 
+        public bool fillAsPivot
+        {
+            get => _fillAsPivot;
+            set
+            {
+                if(_fillAsPivot != value)
+                {
+                    _fillAsPivot = value;
+                    graphics.SetMeshDirty();
+                }
+            }
+        }
+        public Vector2 fillPivot
+        {
+            get
+            {
+                return _customFillPivot.GetValueOrDefault(pivot);
+            }
+            set
+            {
+                if(_customFillPivot != value)
+                {
+                    _customFillPivot = value;
+                    _fillAsPivot = true;//强制设置一次
+                    graphics.SetMeshDirty();
+                }
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -116,7 +148,23 @@ namespace FairyGUI
             get { return _fillMesh != null ? _fillMesh.method : FillMethod.None; }
             set
             {
-                if (_fillMesh == null)
+                FillMethod method = _fillMesh != null ? _fillMesh.method : FillMethod.None;
+                if(method != value)
+                {
+                    if(_fillMesh == null && value == FillMethod.None)
+                    {
+                        return;
+                    }
+                    bool newIsRect = value == FillMethod.Rect;
+                    bool oldIsRect = _fillMesh is FillRectMesh;
+                    if(_fillMesh == null || newIsRect != oldIsRect)
+                    {
+                        _fillMesh = newIsRect ? new FillRectMesh() : new FillMesh();
+                    }
+                    _fillMesh.method = value;
+                    graphics.SetMeshDirty();
+                }
+                /*if (_fillMesh == null)
                 {
                     if (value == FillMethod.None)
                         return;
@@ -127,7 +175,7 @@ namespace FairyGUI
                 {
                     _fillMesh.method = value;
                     graphics.SetMeshDirty();
-                }
+                }*/
             }
         }
 
@@ -177,11 +225,43 @@ namespace FairyGUI
             get { return _fillMesh != null ? _fillMesh.amount : 0; }
             set
             {
+                if (_fillMesh == null)
+                    _fillMesh = new FillMesh();
+
                 if (_fillMesh.amount != value)
                 {
                     _fillMesh.amount = value;
                     graphics.SetMeshDirty();
                 }
+            }
+        }
+
+        public Vector4 fillRectBorder
+        {
+            get
+            {
+                if(_fillMesh is FillRectMesh fillRectMesh)
+                {
+                    return fillRectMesh.border;
+                }
+                return Vector4.zero;
+            }
+            set
+            {
+                FillRectMesh fillRectMesh = _fillMesh as FillRectMesh;
+                if(fillRectMesh == null)
+                {
+                    if(fillMethod == FillMethod.Rect)
+                    {
+                        _fillMesh = fillRectMesh = new FillRectMesh();
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                fillRectMesh.border = value;
+                graphics.SetMeshDirty();
             }
         }
 
@@ -260,7 +340,18 @@ namespace FairyGUI
         {
             if (_fillMesh != null && _fillMesh.method != FillMethod.None)
             {
-                _fillMesh.OnPopulateMesh(vb);
+                if(fillMeshCompatEmpty)
+                {
+                    _fillMesh.OnPopulateMesh(vb, graphics.texture);
+                }
+                else if(_fillAsPivot)
+                {
+                    _fillMesh.OnPopulateMeshPivot(vb, fillPivot);
+                }
+                else
+                {
+                    _fillMesh.OnPopulateMesh(vb);
+                }
             }
             else if (_scaleByTile)
             {

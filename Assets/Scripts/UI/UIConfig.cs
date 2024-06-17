@@ -136,6 +136,11 @@ namespace FairyGUI
         public static int clickDragSensitivity = 2;
 
         /// <summary>
+        /// 拖拽发生时重新采样起始位置，让拖拽起始不突兀
+        /// </summary>
+        public static bool touchDragSampleOnBegin = true;
+
+        /// <summary>
         /// Allow softness on top or left side for scrollpane.
         /// </summary>
         public static bool allowSoftnessOnTopOrLeftSide = true;

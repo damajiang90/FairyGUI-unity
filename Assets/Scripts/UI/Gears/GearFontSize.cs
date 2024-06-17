@@ -81,7 +81,7 @@ namespace FairyGUI
 
         override public void UpdateState()
         {
-            _storage[_controller.selectedPageId] = textFontSize;
+            _storage[_controller.selectedPageId] = textFontSize; //((GTextField)_owner).textFormat.size;
         }
     }
 }

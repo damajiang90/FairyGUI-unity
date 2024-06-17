@@ -52,6 +52,8 @@ namespace FairyGUI.Utils
         {
             get { return button != null ? button.height : 0; }
         }
+        private float _baseline = TextField.IMAGE_BASELINE;
+        public float baseline{get => _baseline;}
 
         public void Create(RichTextField owner, HtmlElement element)
         {
@@ -66,6 +68,7 @@ namespace FairyGUI.Utils
             int height = element.GetInt("height", button.sourceHeight);
             button.SetSize(width, height);
             button.text = element.GetString("value");
+            _baseline = element.GetFloat("baseline", TextField.IMAGE_BASELINE);
         }
 
         public void SetPosition(float x, float y)

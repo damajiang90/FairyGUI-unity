@@ -16,7 +16,7 @@ namespace FairyGUI
     /// <summary>
     /// 
     /// </summary>
-    public interface ITextColorGear : IColorGear
+    public interface ITextColorGear : IAdditionColorGear
     {
         /// <summary>
         /// 

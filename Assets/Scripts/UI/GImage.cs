@@ -56,6 +56,17 @@ namespace FairyGUI
             set { _content.graphics.flip = value; }
         }
 
+        public bool fillAsPivot
+        {
+            get => _content.fillAsPivot;
+            set => _content.fillAsPivot = value;
+        }
+        public Vector2 fillPivot
+        {
+            get => _content.fillPivot;
+            set => _content.fillPivot = value;
+        }
+
         /// <summary>
         /// Fill method.
         /// </summary>
@@ -96,6 +107,15 @@ namespace FairyGUI
         {
             get { return _content.fillAmount; }
             set { _content.fillAmount = value; }
+        }
+
+        /// <summary>
+        /// Fill rect border. (left,top,right,bottom)(0~1)
+        /// </summary>
+        public Vector4 fillRectBorder
+        {
+            get { return _content.fillRectBorder; }
+            set { _content.fillRectBorder = value; }
         }
 
         /// <summary>

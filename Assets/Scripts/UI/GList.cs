@@ -24,6 +24,7 @@ namespace FairyGUI
     /// </summary>
     public class GList : GComponent
     {
+        public static bool checkSameScrollContentOnAlign = true;
         /// <summary>
         /// 如果true，当item不可见时自动折叠，否则依然占位
         /// </summary>
@@ -53,6 +54,12 @@ namespace FairyGUI
         /// 默认true,当设置为false时不会自动改变如单选，多选按钮的状态，使用者可在selectedIndex等api来操作选中状态
         /// </summary>
         public bool changeStateOnClick = true;
+        /// <summary>
+        /// GComponentAnimHandler遍历时是否作为独立动画，
+        /// true默认，则会将list下属动画全部加入list的父级
+        /// false即不将list下属动画加入到list的父级去操作
+        /// </summary>
+        public bool collectAnimToParent = true;
 
         string _defaultItem;
         ListLayoutType _layout;
@@ -2555,10 +2562,18 @@ namespace FairyGUI
             if (newOffset != _alignOffset)
             {
                 _alignOffset = newOffset;
-                if (scrollPane != null)
+                if(scrollPane != null)
+                {
                     scrollPane.AdjustMaskContainer();
+                    if(checkSameScrollContentOnAlign)
+                    {
+                        scrollPane.CheckSameContentFixOnAlign(contentWidth, contentHeight);
+                    }
+                }
                 else
+                {
                     container.SetXY(_margin.left + _alignOffset.x, _margin.top + _alignOffset.y);
+                }
             }
         }
 

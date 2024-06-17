@@ -52,6 +52,7 @@ namespace FairyGUI.Utils
         {
             get { return comboBox != null ? comboBox.height : 0; }
         }
+        public float baseline{get => TextField.IMAGE_BASELINE;}
 
         public void Create(RichTextField owner, HtmlElement element)
         {

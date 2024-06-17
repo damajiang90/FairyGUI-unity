@@ -109,6 +109,23 @@ namespace FairyGUI
             }
         }
 
+        public Color32 titleOriginColor
+        {
+            get
+            {
+                GTextField tf = GetTextField();
+                if (tf != null)
+                    return tf.originColor;
+                else
+                    return Color.black;
+            }
+            set
+            {
+                GTextField tf = GetTextField();
+                if(tf != null) tf.originColor = value;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -134,7 +151,7 @@ namespace FairyGUI
             }
         }
 
-        public Color32 originColor{ get; set; } = Color.white;
+        public Color32 originColor{ get => titleOriginColor; set => titleOriginColor = value; }
 
         /// <summary>
         /// 
@@ -186,7 +203,6 @@ namespace FairyGUI
                 this.icon = str;
             if (buffer.ReadBool())
                 this.titleColor = buffer.ReadColor();
-            originColor = color;
             int iv = buffer.ReadInt();
             if (iv != 0)
                 this.titleFontSize = iv;

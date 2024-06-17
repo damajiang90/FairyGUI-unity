@@ -26,6 +26,19 @@ namespace FairyGUI
         internal List<HtmlElement> rawElements => _elements;
         List<LineInfo> _lines;
         List<CharPosition> _charPositions;
+        private bool _supportDissolveUV3;
+        public bool supportDissolveUV3
+        {
+            get => _supportDissolveUV3;
+            set
+            {
+                if(_supportDissolveUV3 != value)
+                {
+                    _supportDissolveUV3 = value;
+                    _textChanged = true;
+                }
+            }
+        }
 
         BaseFont _font;
         float _textWidth;
@@ -42,7 +55,7 @@ namespace FairyGUI
 
         const int GUTTER_X = 2;
         const int GUTTER_Y = 2;
-        const float IMAGE_BASELINE = 0.8f;
+        public static float IMAGE_BASELINE = 0.8f;
         const int ELLIPSIS_LENGTH = 2;
         static float[] STROKE_OFFSET = new float[]
         {
@@ -809,7 +822,7 @@ namespace FairyGUI
                         {
                             glyphWidth = htmlObject.width + 2;
                             glyphHeight = htmlObject.height;
-                            baseline = glyphHeight * IMAGE_BASELINE;
+                            baseline = glyphHeight * htmlObject.baseline;
                         }
 
                         if (element.isEntity)
@@ -1116,6 +1129,48 @@ namespace FairyGUI
 
             return elementIndex;
         }
+        
+        void AddUV3(List<Vector4> uv3List, int charIdx)
+        {
+            uv3List.Add(new Vector4(charIdx, charIdx, 0, 0));
+            uv3List.Add(new Vector4(charIdx, charIdx, 0, 1));
+            uv3List.Add(new Vector4(charIdx, charIdx, 1, 1));
+            uv3List.Add(new Vector4(charIdx, charIdx, 1, 0));
+        }
+        
+        short DrawLine(float x, float y, float width, int fontSize, int type, int charIdx,
+                            List<Vector3> vertList, List<Vector2> uvList, List<Vector2> uv2List, List<Vector4> uv3List, List<Color32> colList)
+        {
+            short vCount = (short)_font.DrawLine(x, y, width, fontSize, type, vertList, uvList, uv2List, colList);
+            if(_supportDissolveUV3)
+            {
+                for(int i = 0; i < vCount / 4; i++)
+                {
+                    uv3List.Add(new Vector4(charIdx, charIdx, 0, 0));
+                    uv3List.Add(new Vector4(charIdx, charIdx, 0, 1));
+                    uv3List.Add(new Vector4(charIdx, charIdx, 1, 1));
+                    uv3List.Add(new Vector4(charIdx, charIdx, 1, 0));
+                }
+            }
+            return vCount;
+        }
+        
+        short DrawGlyph(float x, float y, int charIdx,
+                      List<Vector3> vertList, List<Vector2> uvList, List<Vector2> uv2List, List<Vector4> uv3List, List<Color32> colList)
+        {
+            short vCount = (short)_font.DrawGlyph(x, y, vertList, uvList, uv2List, colList);
+            if(_supportDissolveUV3)
+            {
+                for(int i = 0; i < vCount / 4; i++)
+                {
+                    uv3List.Add(new Vector4(charIdx, charIdx, 0, 0));
+                    uv3List.Add(new Vector4(charIdx, charIdx, 0, 1));
+                    uv3List.Add(new Vector4(charIdx, charIdx, 1, 1));
+                    uv3List.Add(new Vector4(charIdx, charIdx, 1, 0));
+                }
+            }
+            return vCount;
+        }
 
         public void OnPopulateMesh(VertexBuffer vb)
         {
@@ -1147,6 +1202,7 @@ namespace FairyGUI
             List<Vector3> vertList = vb.vertices;
             List<Vector2> uvList = vb.uvs;
             List<Vector2> uv2List = vb.uvs2;
+            List<Vector4> uv3List = vb.uvs3;
             List<Color32> colList = vb.colors;
 
             HtmlLink currentLink = null;
@@ -1175,12 +1231,15 @@ namespace FairyGUI
             if (elementCount > 0)
                 element = _elements[elementIndex];
 
+            int startCharCount = 0;
             int lineCount = _lines.Count;
             for (int i = 0; i < lineCount; ++i)
             {
                 LineInfo line = _lines[i];
                 if (line.charCount == 0)
                     continue;
+                if (i > 0)
+                    startCharCount += _lines[i - 1].charCount;
 
                 lineClipped = clipping && i != 0 && line.y + line.height > rectHeight;
                 lineAlign = format.align;
@@ -1238,6 +1297,7 @@ namespace FairyGUI
                     int charIndex = line.charIndex + j;
                     char ch = rtlLine != null ? rtlLine[j] : _parsedText[charIndex];
                     bool isEllipsis = charIndex == _ellipsisCharIndex;
+                    int uv3CharIndex = startCharCount + j + 1;
 
                     while (element != null && charIndex == element.charIndex)
                     {
@@ -1255,9 +1315,11 @@ namespace FairyGUI
                                             lineWidth = (clipping ? Mathf.Clamp(posx, GUTTER_X, GUTTER_X + rectWidth) : posx) - underlineStart;
                                         else
                                             lineWidth = underlineStart - (clipping ? Mathf.Clamp(posx, GUTTER_X, GUTTER_X + rectWidth) : posx);
-                                        if (lineWidth > 0)
-                                            vertCount += (short)_font.DrawLine(underlineStart < posx ? underlineStart : posx, -(line.y + line.baseline), lineWidth,
-                                                maxFontSize, 0, vertList, uvList, uv2List, colList);
+                                        if(lineWidth > 0)
+                                        {
+                                            vertCount += DrawLine(underlineStart < posx ? underlineStart : posx, -(line.y + line.baseline), lineWidth,
+                                                maxFontSize, 0, uv3CharIndex, vertList, uvList, uv2List, uv3List, colList);
+                                        }
                                     }
                                     maxFontSize = 0;
                                 }
@@ -1277,8 +1339,8 @@ namespace FairyGUI
                                         else
                                             lineWidth = strikethroughStart - (clipping ? Mathf.Clamp(posx, GUTTER_X, GUTTER_X + rectWidth) : posx);
                                         if (lineWidth > 0)
-                                            vertCount += (short)_font.DrawLine(strikethroughStart < posx ? strikethroughStart : posx, -(line.y + line.baseline), lineWidth,
-                                                minFontSize, 1, vertList, uvList, uv2List, colList);
+                                            vertCount += DrawLine(strikethroughStart < posx ? strikethroughStart : posx, -(line.y + line.baseline), lineWidth,
+                                                minFontSize, 1, uv3CharIndex, vertList, uvList, uv2List, uv3List, colList);
                                     }
                                     minFontSize = int.MaxValue;
                                 }
@@ -1341,7 +1403,7 @@ namespace FairyGUI
                                 else
                                     element.status &= 254;
 
-                                element.position = new Vector2(posx + 1, line.y + line.baseline - htmlObj.height * IMAGE_BASELINE);
+                                element.position = new Vector2(posx + 1, line.y + line.baseline - htmlObj.height * htmlObj.baseline);
                                 htmlObj.SetPosition(element.position.x, element.position.y);
 
                                 if (_textDirection == RTLSupport.DirectionType.RTL)
@@ -1413,7 +1475,7 @@ namespace FairyGUI
                             lastGlyphWidth = glyphWidth;
                             posy = -(line.y + line.baseline);
                         }
-                        vertCount = (short)_font.DrawGlyph(posx, posy, vertList, uvList, uv2List, colList);
+                        vertCount = DrawGlyph(posx, posy, uv3CharIndex, vertList, uvList, uv2List, uv3List, colList);
 
                         if (_charPositions != null)
                         {
@@ -1463,8 +1525,8 @@ namespace FairyGUI
                         else
                             lineWidth = underlineStart - (clipping ? Mathf.Clamp(posx, GUTTER_X, GUTTER_X + rectWidth) : posx);
                         if (lineWidth > 0)
-                            vertCount += (short)_font.DrawLine(underlineStart < posx ? underlineStart : posx, -(line.y + line.baseline), lineWidth,
-                                maxFontSize, 0, vertList, uvList, uv2List, colList);
+                            vertCount += DrawLine(underlineStart < posx ? underlineStart : posx, -(line.y + line.baseline), lineWidth,
+                                maxFontSize, 0, startCharCount + lineCharCount + 1, vertList, uvList, uv2List, uv3List, colList);
                     }
 
                     if (format.strikethrough)
@@ -1475,8 +1537,8 @@ namespace FairyGUI
                         else
                             lineWidth = strikethroughStart - (clipping ? Mathf.Clamp(posx, GUTTER_X, GUTTER_X + rectWidth) : posx);
                         if (lineWidth > 0)
-                            vertCount += (short)_font.DrawLine(strikethroughStart < posx ? strikethroughStart : posx, -(line.y + line.baseline), lineWidth,
-                                minFontSize, 1, vertList, uvList, uv2List, colList);
+                            vertCount += DrawLine(strikethroughStart < posx ? strikethroughStart : posx, -(line.y + line.baseline), lineWidth,
+                                minFontSize, 1, startCharCount + lineCharCount + 1, vertList, uvList, uv2List, uv3List, colList);
                     }
 
                     if (vertCount > 0 && _charPositions != null)
@@ -1510,6 +1572,8 @@ namespace FairyGUI
                 uvList.RemoveRange(65000, count - 65000);
                 if (uv2List.Count > 0)
                     uv2List.RemoveRange(65000, count - 65000);
+                if (uv3List.Count > 0) 
+                    uv3List.RemoveRange(65000, count - 65000);
                 count = 65000;
             }
 

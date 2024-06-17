@@ -81,6 +81,17 @@ namespace FairyGUI
             set { _content.graphics.flip = value; }
         }
 
+        public bool fillAsPivot
+        {
+            get => _content.fillAsPivot;
+            set => _content.fillAsPivot = value;
+        }
+        public Vector2 fillPivot
+        {
+            get => _content.fillPivot;
+            set => _content.fillPivot = value;
+        }
+
         /// <summary>
         /// 
         /// </summary>

@@ -469,14 +469,27 @@ namespace FairyGUI
             return rect;
         }
         
-        public Rect GetSelfBounds(DisplayObject targetSpace)
+        public Rect GetClampParentBounds(DisplayObject targetSpace)
         {
-            Vector2 v = TransformPoint(Vector2.zero, targetSpace);
-            var localScale = cachedTransform.localScale;
+            Container container = this;
+            while(container._clampInParentBound && container != targetSpace)
+            {
+                Container p = container.parent;
+                if(p != null)
+                {
+                    container = p;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            Vector2 v = container.TransformPoint(Vector2.zero, targetSpace);
+            var localScale = container.cachedTransform.localScale;
             return Rect.MinMaxRect(
                 v.x, v.y,
-                v.x + _contentRect.width * localScale.x,
-                v.y + _contentRect.height * localScale.y);
+                v.x + container._contentRect.width * localScale.x,
+                v.y + container._contentRect.height * localScale.y);
         }
 
         /// <summary>
@@ -972,7 +985,7 @@ namespace FairyGUI
                             Rect rect = container.GetBounds(initiator);
                             if(container._clampInParentBound)
                             {
-                                Rect parentRect = GetSelfBounds(initiator);
+                                Rect parentRect = GetClampParentBounds(initiator);
                                 container._batchingBounds[0] = Mathf.Max(parentRect.xMin, rect.xMin);
                                 container._batchingBounds[1] = Mathf.Max(parentRect.yMin, rect.yMin);
                                 container._batchingBounds[2] = Mathf.Min(parentRect.xMax, rect.xMax);
@@ -999,7 +1012,7 @@ namespace FairyGUI
                         Rect rect = child.GetBounds(initiator);
                         if(child._clampInParentBound)
                         {
-                            Rect parentRect = GetSelfBounds(initiator);
+                            Rect parentRect = GetClampParentBounds(initiator);
                             child._batchingBounds[0] = Mathf.Max(parentRect.xMin, rect.xMin);
                             child._batchingBounds[1] = Mathf.Max(parentRect.yMin, rect.yMin);
                             child._batchingBounds[2] = Mathf.Min(parentRect.xMax, rect.xMax);

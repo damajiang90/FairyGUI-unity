@@ -259,6 +259,24 @@ namespace FairyGUI
         }
 
         /// <summary>
+        /// 是否被裁剪空白
+        /// </summary>
+        public bool isEmptyClipped => _originalSize.x != _region.width || _originalSize.y != _region.height;
+
+        public bool GetEmptyClippedDrawRect(Rect drawRect, out Rect emptyClippedRect)
+        {
+            if(_originalSize.x == _region.width && _originalSize.y == _region.height)
+            {
+                emptyClippedRect = drawRect;
+                return false;
+            }
+            float sx = drawRect.width / _originalSize.x;
+            float sy = drawRect.height / _originalSize.y;
+            emptyClippedRect = new Rect(_offset.x * sx, _offset.y * sy, _region.width * sx, _region.height * sy);
+            return true;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="drawRect"></param>

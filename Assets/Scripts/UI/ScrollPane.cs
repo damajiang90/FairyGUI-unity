@@ -25,6 +25,7 @@ namespace FairyGUI
         bool _hScrollNone;
         bool _needRefresh;
         int _refreshBarAxis;
+        bool _touchDragSampleOnBegin;
 
         bool _displayOnLeft;
         bool _snapToItem;
@@ -61,6 +62,7 @@ namespace FairyGUI
         int _headerLockedSize;
         int _footerLockedSize;
         bool _hover;
+        int _defaultExclusiveContainer = 2;
 
         int _tweening;
         Vector2 _tweenStart;
@@ -103,6 +105,7 @@ namespace FairyGUI
             _decelerationRate = UIConfig.defaultScrollDecelerationRate;
             _touchEffect = UIConfig.defaultScrollTouchEffect;
             _bouncebackEffect = UIConfig.defaultScrollBounceEffect;
+            _touchDragSampleOnBegin = UIConfig.touchDragSampleOnBegin;
             _mouseWheelEnabled = true;
             _pageSize = Vector2.one;
 
@@ -347,6 +350,24 @@ namespace FairyGUI
             set { _bouncebackEffect = value; }
         }
 
+        /// <summary>
+        /// 拖拽发生时重新采样起始位置，让拖拽起始不突兀
+        /// </summary>
+        public bool touchDragSampleOnBegin
+        {
+            get { return _touchDragSampleOnBegin; }
+            set { _touchDragSampleOnBegin = value; }
+        }
+
+        /// <summary>
+        /// index不在容器时,按需自动滑动item数量，系统默认2
+        /// </summary>
+        public int defaultExclusiveContainer
+        {
+            get { return _defaultExclusiveContainer; }
+            set { _defaultExclusiveContainer = value; }
+        }
+        
         /// <summary>
         /// 是否允许拖拽内容区域进行滚动。
         /// </summary>
@@ -889,7 +910,7 @@ namespace FairyGUI
                 float bottom = _yPos + _viewSize.y;
                 if (setFirst || rect.y <= _yPos || rect.height >= _viewSize.y)
                 {
-                    if (rect.yMax >= bottom) //if an item size is large than viewSize, dont scroll
+                    if (!setFirst && rect.yMax >= bottom) //if an item size is large than viewSize, dont scroll
                         return;
 
                     if (_pageMode)
@@ -902,7 +923,7 @@ namespace FairyGUI
                     if (_pageMode)
                         this.SetPosY(Mathf.Floor(rect.y / _pageSize.y) * _pageSize.y, ani);
                     else if (rect.height <= _viewSize.y / 2)
-                        SetPosY(rect.y + rect.height * 2 - _viewSize.y, ani);
+                        SetPosY(rect.y + rect.height * _defaultExclusiveContainer - _viewSize.y, ani);
                     else
                         SetPosY(rect.y + Mathf.Min(rect.height - _viewSize.y, 0), ani);
                 }
@@ -912,7 +933,7 @@ namespace FairyGUI
                 float right = _xPos + _viewSize.x;
                 if (setFirst || rect.x <= _xPos || rect.width >= _viewSize.x)
                 {
-                    if (rect.xMax >= right) //if an item size is large than viewSize, dont scroll
+                    if (!setFirst && rect.xMax >= right) //if an item size is large than viewSize, dont scroll
                         return;
 
                     if (_pageMode)
@@ -924,7 +945,7 @@ namespace FairyGUI
                     if (_pageMode)
                         this.SetPosX(Mathf.Floor(rect.x / _pageSize.x) * _pageSize.x, ani);
                     else if (rect.width <= _viewSize.x / 2)
-                        SetPosX(rect.x + rect.width * 2 - _viewSize.x, ani);
+                        SetPosX(rect.x + rect.width * _defaultExclusiveContainer - _viewSize.x, ani);
                     else
                         SetPosX(rect.x + Mathf.Min(rect.width - _viewSize.x, 0), ani);
                 }
@@ -1123,6 +1144,20 @@ namespace FairyGUI
             _contentSize.x = aWidth;
             _contentSize.y = aHeight;
             HandleSizeChanged();
+        }
+
+        /// <summary>
+        /// fgui底层疑似bug，align不是左上时，变化align应该要触发maskRect，但唯一设置maskRect的地方在HandleSizeChanged，
+        /// 顺序问题当List.HandleAlign时，contentSize并没变化导致maskRect没法更新， 则出现了裁剪区域异常，这里如果判定到size没变化，强制修复一下（size变化自然原有逻辑会更新）
+        /// </summary>
+        /// <param name="aWidth"></param>
+        /// <param name="aHeight"></param>
+        internal void CheckSameContentFixOnAlign(float aWidth, float aHeight)
+        {
+            if(Mathf.Approximately(_contentSize.x, aWidth) && Mathf.Approximately(_contentSize.y, aHeight))
+            {
+                HandleSizeChanged();
+            }
         }
 
         /// <summary>
@@ -1508,6 +1543,11 @@ namespace FairyGUI
 
                 sh = isHScrollValid;
                 sv = isVScrollValid;
+            }
+
+            if(_touchDragSampleOnBegin && !_isHoldAreaDone)
+            {
+                _beginTouchPos = pt;
             }
 
             Vector2 newPos = _containerPos + pt - _beginTouchPos;
@@ -2053,6 +2093,9 @@ namespace FairyGUI
             return ret;
         }
 
+        public static bool fixTargetOnTouchScreen = false;
+        private bool needFixTarget => fixTargetOnTouchScreen && Stage.touchScreen;
+
         float UpdateTargetAndDuration(float pos, int axis)
         {
             float v = _velocity[axis];
@@ -2067,11 +2110,11 @@ namespace FairyGUI
                 //以屏幕像素为基准
                 float v2 = Mathf.Abs(v) * _velocityScale;
                 //在移动设备上，需要对不同分辨率做一个适配，我们的速度判断以1136分辨率为基准
-                if (Stage.touchScreen)
+                if (needFixTarget)
                     v2 *= 1136f / Mathf.Max(Screen.width, Screen.height);
                 //这里有一些阈值的处理，因为在低速内，不希望产生较大的滚动（甚至不滚动）
                 float ratio = 0;
-                if (_pageMode || !Stage.touchScreen)
+                if (_pageMode || !needFixTarget)
                 {
                     if (v2 > 500)
                         ratio = Mathf.Pow((v2 - 500) / 500, 2);

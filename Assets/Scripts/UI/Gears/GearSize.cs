@@ -90,7 +90,8 @@ namespace FairyGUI
                         .SetEase(_tweenConfig.easeType, _tweenConfig.customEase)
                         .SetUserData((a ? 1 : 0) + (b ? 2 : 0))
                         .SetTarget(this)
-                        .SetListener(this);
+                        .SetListener(this)
+                        .SetIgnoreEngineTimeScale(_tweenConfig.ignoreEngineTimeScale);
                 }
             }
             else

@@ -55,6 +55,7 @@ namespace FairyGUI.Utils
         {
             get { return 0; }
         }
+        public float baseline{get => TextField.IMAGE_BASELINE;}
 
         public void Create(RichTextField owner, HtmlElement element)
         {

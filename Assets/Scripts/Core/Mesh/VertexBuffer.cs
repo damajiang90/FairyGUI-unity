@@ -47,6 +47,7 @@ namespace FairyGUI
         /// 
         /// </summary>
         public readonly List<Vector2> uvs2;
+        public readonly List<Vector4> uvs3;
 
         /// <summary>
         /// 
@@ -101,6 +102,7 @@ namespace FairyGUI
             colors = new List<Color32>();
             uvs = new List<Vector2>();
             uvs2 = new List<Vector2>();
+            uvs3 = new List<Vector4>();
             triangles = new List<int>();
         }
 
@@ -121,6 +123,7 @@ namespace FairyGUI
             colors.Clear();
             uvs.Clear();
             uvs2.Clear();
+            uvs3.Clear();
             triangles.Clear();
 
             _isArbitraryQuad = false;
@@ -433,6 +436,7 @@ namespace FairyGUI
             vertices.AddRange(vb.vertices);
             uvs.AddRange(vb.uvs);
             uvs2.AddRange(vb.uvs2);
+            uvs3.AddRange(vb.uvs3);
             colors.AddRange(vb.colors);
             if (len != 0)
             {
@@ -456,6 +460,7 @@ namespace FairyGUI
             vertices.InsertRange(0, vb.vertices);
             uvs.InsertRange(0, vb.uvs);
             uvs2.InsertRange(0, vb.uvs2);
+            uvs3.InsertRange(0, vb.uvs3);
             colors.InsertRange(0, vb.colors);
             int len = triangles.Count;
             if (len != 0)

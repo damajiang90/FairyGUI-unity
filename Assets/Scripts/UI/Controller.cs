@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using FairyGUI.Utils;
 using System;
+using UnityEngine;
 
 namespace FairyGUI
 {
@@ -68,8 +69,12 @@ namespace FairyGUI
             {
                 if (_selectedIndex != value)
                 {
-                    if (value > _pageIds.Count - 1)
-                        throw new IndexOutOfRangeException("" + value);
+                    if(value > _pageIds.Count - 1)
+                    {
+                        Debug.LogErrorFormat("FairyGUI控制器越界,ui:{0},name:{1},index:{2}", parent?.name, name, value);
+                        return;
+                        //throw new IndexOutOfRangeException("" + value);
+                    }
 
                     changing = true;
 
@@ -93,8 +98,12 @@ namespace FairyGUI
         {
             if (_selectedIndex != value)
             {
-                if (value > _pageIds.Count - 1)
-                    throw new IndexOutOfRangeException("" + value);
+                if(value > _pageIds.Count - 1)
+                {
+                    Debug.LogErrorFormat("FairyGUI控制器越界,ui:{0},name:{1},index:{2}", parent?.name, name, value);
+                    return;
+                    //throw new IndexOutOfRangeException("" + value);
+                }
 
                 changing = true;
                 _previousIndex = _selectedIndex;
@@ -242,6 +251,28 @@ namespace FairyGUI
             else
             {
                 _pageIds.Insert(index, nid);
+                _pageNames.Insert(index, name);
+            }
+        }
+
+        public void AddPageId(string id, string name)
+        {
+            if (name == null)
+                name = string.Empty;
+
+            AddPageIdAt(id, name, _pageIds.Count);
+        }
+
+        public void AddPageIdAt(string id, string name, int index)
+        {
+            if (index == _pageIds.Count)
+            {
+                _pageIds.Add(id);
+                _pageNames.Add(name);
+            }
+            else
+            {
+                _pageIds.Insert(index, id);
                 _pageNames.Insert(index, name);
             }
         }

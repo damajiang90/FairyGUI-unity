@@ -190,6 +190,8 @@ namespace FairyGUI
         /// </summary>
         public float delay;
 
+        public bool ignoreEngineTimeScale;
+
         internal uint _displayLockToken;
         internal GTweener _tweener;
 
@@ -199,6 +201,7 @@ namespace FairyGUI
             easeType = EaseType.QuadOut;
             duration = 0.3f;
             delay = 0;
+            ignoreEngineTimeScale = false;
         }
     }
 }

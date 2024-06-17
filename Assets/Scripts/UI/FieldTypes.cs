@@ -242,6 +242,8 @@
         /// The Image will be filled Radially with the radial center at the center.
         /// </summary>
         Radial360 = 5,
+        
+        Rect = 11,
     }
 
     /// <summary>

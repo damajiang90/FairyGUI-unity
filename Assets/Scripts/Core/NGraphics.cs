@@ -805,6 +805,8 @@ namespace FairyGUI
             mesh.SetTriangles(vb.triangles, 0);
             if (vb.uvs2.Count == vb.uvs.Count)
                 mesh.SetUVs(1, vb.uvs2);
+            if (vb.uvs3.Count == vb.uvs.Count)
+                mesh.SetUVs(2, vb.uvs3);
 
 #if !UNITY_5_6_OR_NEWER
             _colors = null;
@@ -830,6 +832,12 @@ namespace FairyGUI
                 uv = new Vector2[vertCount];
                 vb.uvs2.CopyTo(uv);
                 mesh.uv2 = uv;
+            }
+            if(vb.uvs3.Count==uv.Length)
+            {
+                uv = new Vector4[vertCount];
+                vb.uvs3.CopyTo(uv);
+                mesh.uvs3 = uv;
             }
 #endif
             vb.End();

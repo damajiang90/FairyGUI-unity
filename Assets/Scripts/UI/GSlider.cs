@@ -41,6 +41,7 @@ namespace FairyGUI
             _max = 100;
             changeOnClick = true;
             canDrag = true;
+            OpenValueLimit = false;
         }
 
         /// <summary>
@@ -116,6 +117,29 @@ namespace FairyGUI
             }
         }
 
+        private double _minValueLimit;
+
+        public double MinValueLimit
+        {
+            get => _minValueLimit;
+            set => _minValueLimit = value;
+        }
+
+        private bool _openValueLimit;
+        public bool OpenValueLimit
+        {
+            get => _openValueLimit;
+            set => _openValueLimit = value;
+        }
+
+        private double _maxValueLimit;
+
+        public double MaxValueLimit
+        {
+            get => _maxValueLimit;
+            set => _maxValueLimit = value;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -129,7 +153,15 @@ namespace FairyGUI
             {
                 if (_value != value)
                 {
-                    _value = value;
+                    if (_openValueLimit)
+                    {
+                        _value = ClampDouble(value, _minValueLimit, _maxValueLimit);
+                    }
+                    else
+                    {
+                        _value = value;
+                    }
+                    
                     Update();
                 }
             }
@@ -154,6 +186,15 @@ namespace FairyGUI
             }
         }
 
+        private double ClampDouble(double value, double min, double max)
+        {
+            if (value < min)
+                value = min;
+            else if (value > max)
+                value = max;
+            return value;
+        }
+
         private void Update()
         {
             UpdateWithPercent((float)((_value - _min) / (_max - _min)), false);
@@ -172,12 +213,16 @@ namespace FairyGUI
                 if (_wholeNumbers)
                 {
                     newValue = Math.Round(newValue);
+                    if (_openValueLimit)
+                    {
+                        newValue = ClampDouble(newValue, _minValueLimit, _maxValueLimit);
+                    }
                     percent = Mathf.Clamp01((float)((newValue - _min) / (_max - _min)));
                 }
 
-                if (newValue != _value)
+                if (newValue != value)
                 {
-                    _value = newValue;
+                    value = newValue;
                     if (DispatchEvent("onChanged", null))
                         return;
                 }
@@ -311,7 +356,7 @@ namespace FairyGUI
                 return;
             }
 
-            _value = buffer.ReadInt();
+            value = buffer.ReadInt();
             _max = buffer.ReadInt();
             if (buffer.version >= 2)
                 _min = buffer.ReadInt();

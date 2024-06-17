@@ -191,6 +191,8 @@ namespace FairyGUI
                     UpdateSize();
             }
         }
+        
+        public Color32 originColor{get;set;}
 
         /// <summary>
         /// 
@@ -343,6 +345,18 @@ namespace FairyGUI
             get { return _textField.textHeight; }
         }
 
+        public bool supportDissolveUV3
+        {
+            get
+            {
+                return _textField.supportDissolveUV3;
+            }
+            set
+            {
+                _textField.supportDissolveUV3 = value;
+            }
+        }
+
         protected void UpdateSize()
         {
             if (_updatingSize)
@@ -435,6 +449,7 @@ namespace FairyGUI
             }
 
             _textField.textFormat = tf;
+            originColor = color;
         }
 
         override public void Setup_AfterAdd(ByteBuffer buffer, int beginPos)
