@@ -56,19 +56,28 @@ namespace FairyGUI
 
         protected internal static bool textRebuildFlag;
 
-        public static float SupScale = 0.58f;
+        public static float SupScale = 0.6f;
         public static float SupOffset = 0.1f;
-        public static float RubyOffset = 0.1f;
-
-        virtual public void UpdateGraphics(NGraphics graphics)
-        {
-        }
+        public static float RubyOffset = 0.9f;
 
         virtual public void SetFormat(TextFormat format, float fontSizeScale)
         {
         }
 
-        virtual public void PrepareCharacters(string text)
+        virtual public void PrepareCharacters(string text, TextFormat format, float fontSizeScale)
+        {
+        }
+
+        virtual public void Prepare(TextFormat format)
+        {
+        }
+
+        virtual public bool BuildGraphics(NGraphics graphics)
+        {
+            return false;
+        }
+
+        virtual public void StartDraw(NGraphics graphics)
         {
         }
 
@@ -80,16 +89,12 @@ namespace FairyGUI
             return false;
         }
 
-        virtual public int DrawGlyph(float x, float y,
-            List<Vector3> vertList, List<Vector2> uvList, List<Vector2> uv2List, List<Color32> colList)
+        virtual public void DrawGlyph(VertexBuffer vb, float x, float y2)
         {
-            return 0;
         }
 
-        virtual public int DrawLine(float x, float y, float width, int fontSize, int type,
-            List<Vector3> vertList, List<Vector2> uvList, List<Vector2> uv2List, List<Color32> colList)
+        virtual public void DrawLine(VertexBuffer vb, float x, float y, float width, int fontSize, int type)
         {
-            return 0;
         }
 
         virtual public bool HasCharacter(char ch)
@@ -104,6 +109,11 @@ namespace FairyGUI
 
         virtual public void Dispose()
         {
+        }
+
+        virtual public int GetDrawVertCount()
+        {
+            return 0;
         }
     }
 }

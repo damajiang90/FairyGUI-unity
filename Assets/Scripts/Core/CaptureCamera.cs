@@ -64,6 +64,14 @@ namespace FairyGUI
         public const string LayerName = "VUI";
         public const string HiddenLayerName = "Hidden VUI";
 
+#if UNITY_2019_3_OR_NEWER
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Init()
+        {
+            _main = null;
+        }
+#endif
+
         void OnEnable()
         {
             cachedCamera = this.GetComponent<Camera>();
@@ -99,14 +107,9 @@ namespace FairyGUI
             camera.nearClipPlane = -30;
             camera.farClipPlane = 30;
             camera.enabled = false;
-#if UNITY_5_4_OR_NEWER
             camera.stereoTargetEye = StereoTargetEyeMask.None;
-#endif
-
-#if UNITY_5_6_OR_NEWER
             camera.allowHDR = false;
             camera.allowMSAA = false;
-#endif
             var cameraData = camera.GetUniversalAdditionalCameraData();
             if(cameraData != null)
             {

@@ -10,42 +10,7 @@ namespace FairyGUI
     {
         Dictionary<string, int> _storage;
         int _default;
-        int textFontSize
-        {
-            get
-            {
-                if(_owner is GTextField textField)
-                {
-                    return textField.textFormat.size;
-                }
-                else if(_owner is GLabel label)
-                {
-                    return label.titleFontSize;
-                }
-                else if(_owner is GButton button)
-                {
-                    return button.titleFontSize;
-                }
-                return 0;
-            }
-            set
-            {
-                if(_owner is GTextField textField)
-                {
-                    TextFormat format = textField.textFormat;
-                    format.size = value;
-                    textField.textFormat = format;
-                }
-                else if(_owner is GLabel label)
-                {
-                    label.titleFontSize = value;
-                }
-                else if(_owner is GButton button)
-                {
-                    button.titleFontSize = value;
-                }
-            }
-        }
+        GTextField _textField;
 
         public GearFontSize(GObject owner)
             : base(owner)
@@ -54,7 +19,14 @@ namespace FairyGUI
 
         protected override void Init()
         {
-            _default = textFontSize;
+            if (_owner is GLabel)
+                _textField = ((GLabel)_owner).GetTextField();
+            else if (_owner is GButton)
+                _textField = ((GButton)_owner).GetTextField();
+            else
+                _textField = (GTextField)_owner;
+
+            _default = _textField.textFormat.size;
             _storage = new Dictionary<string, int>();
         }
 
@@ -68,20 +40,26 @@ namespace FairyGUI
 
         override public void Apply()
         {
+            if (_textField == null)
+                return;
+
             _owner._gearLocked = true;
 
             int cv;
             if (!_storage.TryGetValue(_controller.selectedPageId, out cv))
                 cv = _default;
 
-            textFontSize = cv;
+            TextFormat tf = _textField.textFormat;
+            tf.size = cv;
+            _textField.textFormat = tf;
 
             _owner._gearLocked = false;
         }
 
         override public void UpdateState()
         {
-            _storage[_controller.selectedPageId] = textFontSize; //((GTextField)_owner).textFormat.size;
+            if (_textField != null)
+                _storage[_controller.selectedPageId] = _textField.textFormat.size;
         }
     }
 }
